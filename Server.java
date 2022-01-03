@@ -21,7 +21,6 @@ public class Server {
                     while (true) {
                             int flag = 0;
                             TaggedConnection.Frame frame = connection.receive();
-                            int tag = frame.tag;
                             String data = new String(frame.data);
                         try {
                             if (frame.tag == 0) { // Registo
@@ -44,19 +43,25 @@ public class Server {
                             else if (frame.tag == 2) { // Pediro Voo
                                 String[] tokens = data.split(" ");
                                 boolean r = model.searchFlight(tokens[0], tokens[1]);
-                                connection.send(frame.tag, String.valueOf(flag).getBytes());
                                 if(r){
+                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
                                     connection.send(frame.tag, ("Voo Encontrado").getBytes());
-                                }
-                                else{
-                                    connection.send(frame.tag, ("Não foram encontrados voos").getBytes());
                                 }
                             }
                             else if (frame.tag == 3) { // Pediro Lista Voos
-
+                                String allflights = model.allFlightsToString();
+                                if(allflights != null){
+                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
+                                    connection.send(frame.tag, allflights.getBytes());
+                                }
                             }
                             else if (frame.tag == 4) { // Adicionar Voo
-
+                                String[] tokens = data.split(" ");
+                                boolean r = model.createFlight(tokens[0], tokens[1], tokens[2]);
+                                if(r){
+                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
+                                    connection.send(frame.tag, ("Novo voo adicionado!").getBytes());
+                                }
                             }
                         }
                         catch (IOException e){

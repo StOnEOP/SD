@@ -33,4 +33,13 @@ public class Flight {
             l.unlock();
         }
     }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.from+"\t");
+        sb.append(this.to+"\t");
+        sb.append(this.seats_taken+"\t");
+        sb.append(this.total_capacity);
+        return sb.toString();
+    }
 }

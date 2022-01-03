@@ -67,4 +67,18 @@ public class Model {
         }
         return false;
     }
+
+    public String allFlightsToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("From     To      Ocupied Seats   Total capacity\n");
+        for(int i = 0; i < this.allFlights.size(); i++){
+            sb.append(allFlights.get(i).toString());
+        }
+        return sb.toString();
+    }
+
+    public boolean createFlight(String from, String to, String seats){
+        int seats_i = Integer.parseInt(seats);
+        return this.allFlights.add(new Flight(from, to, 0, seats_i));
+    }
 }
