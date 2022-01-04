@@ -83,19 +83,19 @@ public class Model {
         return null;
     }
 
-    public Flight getFlight(String from, String to) {
+    public int getFlightIndex(String from, String to) {
         for(int i = 0; i < this.allFlights.size(); i++){
             if(allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to)) {
                 try {
                     lock.lock();
-                    return allFlights.get(i);
+                    return i;
                 }
                 finally {
                     lock.unlock();
                 }
             }
         }
-        return null;
+        return -1;
     }
 
     public String allFlightsToString() {
@@ -122,9 +122,10 @@ public class Model {
             for(int i=0; i < destinations.size()-1; i++) {
                 String from = destinations.get(i);
                 String to =  destinations.get(i+1);
-                Flight f;
-                f = getFlight(from, to);
+                int index = getFlightIndex(from, to);
+                Flight f = allFlights.get(index);
                 res.add(f);
+                f.addSeat();
             }
             do {
                 number = rnd. nextInt(999999);
@@ -147,13 +148,13 @@ public class Model {
         return true;
     }
 
-    public void addTrip(String code, List<Flight> flights) {
-        try {
-            lock.lock();
-            this.allTrips.put(code,flights);
+    public boolean cancelTrip(String username, String code) {
+        if(!allUsers.containsKey(code)) return false;
+        allUsers.get(username).removeReservation(code);
+        for(Flight f : allTrips.get(code)) {
+            f.removeSeat();
         }
-        finally {
-            lock.unlock();
-        }
+        allTrips.remove(code);
+        return true;
     }
 }

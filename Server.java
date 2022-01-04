@@ -63,7 +63,7 @@ public class Server {
                                     connection.send(frame.tag, ("Novo voo adicionado!").getBytes());
                                 }
                             }
-                            else if(frame.tag == 5) { //Fazer uma reserva de voos em escala
+                            else if (frame.tag == 5) { //Fazer uma reserva de voos em escala
                                 String[] tokens = data.split(";"); //Username;Porto-London-Tokyo;Data1-Data2
                                 String[] dests = tokens[1].split("-");
                                 String[] dates = tokens[2].split("-");
@@ -73,6 +73,14 @@ public class Server {
                                 if(code != null) {
                                     connection.send(frame.tag,String.valueOf(flag).getBytes());
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
+                                }
+                            }
+                            else if (frame.tag == 6) { //Cancelar uma reserva
+                                String tokens[] = data.split(" ");
+                                boolean r = model.cancelTrip(tokens[0], tokens[1]);
+                                if(r) {
+                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
+                                    connection.send(frame.tag, ("Reserva com o código: " + tokens[1] + " cancelada.").getBytes());
                                 }
                             }
                         }

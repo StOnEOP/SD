@@ -71,6 +71,14 @@ public class Flight {
         return this.seats_taken == this.total_capacity;
     }
 
+    public void addSeat() {
+        this.seats_taken++;
+    }
+
+    public void removeSeat() {
+        this.seats_taken--;
+    }
+
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append(this.from+"\t");

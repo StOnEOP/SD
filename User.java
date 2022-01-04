@@ -84,6 +84,10 @@ public class User {
         this.reservations.add(code);
     }
 
+    public void removeReservation(String code) {
+        this.reservations.remove(code);
+    }
+
     public boolean checkPassword(String password) {
         try{
             l.lock();
