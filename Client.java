@@ -216,5 +216,51 @@ public class Client {
             System.out.println("\033[1;36m"+ new String(b1)+"\033[0m");
             menuPrincipalE();
         }
+    static void createTrip() {
+        Thread t = new Thread(() -> {
+            try{
+                System.out.println("Insira o seu nome de Utilizador: ");
+                Strin user = scin.nextLine();
+                System.out.println("Insira todas as escalas separadas por '-' : ");
+                String escalas = scin.nextLine();
+                System.out.println("Insira um intervalo de datas da separado por '-' : ");
+                String datas = scin.nextLine();
+                m.send(5,(user+";"+escalas+";"+datas).getBytes());
+                byte[] b = m.receive(5);
+                if (excecao==0){
+                    System.out.println("\033[1;36m"+ new String(b1)+"\033[0m");
+                    userMenu();
+                }
+                else menu.printExcecao(new String(b1) + "\nErro ao criar uma viagem com escalas.");
+            }
+            catch (IOException e) {
+                e.getMessage();
+            }
+        });
+        t.start();
+        t.join();
+    }
+
+    static void cancelTrip() {
+        Thread t = new Thread(() -> {
+            try {
+                System.out.println("Insira o seu nome de Utilizador: ");
+                Strin user = scin.nextLine();
+                System.out.println("Insira o código de reserva: ");
+                String code = scin.nextLine();
+                m.send(6,(user+" "+code).getBytes());
+                byte[] b = m.receive(6); 
+                if (excecao==0){
+                    System.out.println("\033[1;36m"+ new String(b1)+"\033[0m");
+                    userMenu();
+                }
+                else menu.printExcecao(new String(b1) + "\nErro ao cancelar a reserva.");
+            }
+            catch (IOException e) {
+                e.getMessage();
+            }
+        });
+        t.start();
+        t.join();
     }
 }
