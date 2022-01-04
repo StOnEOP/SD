@@ -1,12 +1,16 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Model {
     private Map<String, User> allUsers;
     private List<Flight> allFlights;
+    private Map<String,List<Flight>> allTrips; //String: código de reserva, List: voos de uma viagem
     private ReentrantLock lock = new ReentrantLock();
 
     public Model() {
@@ -68,6 +72,32 @@ public class Model {
         return false;
     }
 
+    public LocalDate searchAvailableFlightBetweenDates(String from, String to, LocalDate start, LocalDate end) {
+        for(int i = 0; i < this.allFlights.size(); i++){
+            if(allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to) && (
+                allFlights.get(i).getDate().isEqual(start) || allFlights.get(i).getDate().isEqual(end) ||
+                (allFlights.get(i).getDate().isAfter(start) && allFlights.get(i).getDate().isBefore(end))) 
+                && allFlights.get(i).isFull())
+                return allFlights.get(i).getDate();
+        }
+        return null;
+    }
+
+    public Flight getFlight(String from, String to) {
+        for(int i = 0; i < this.allFlights.size(); i++){
+            if(allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to)) {
+                try {
+                    lock.lock();
+                    return allFlights.get(i);
+                }
+                finally {
+                    lock.unlock();
+                }
+            }
+        }
+        return null;
+    }
+
     public String allFlightsToString() {
         StringBuilder sb = new StringBuilder();
         sb.append("From     To      Ocupied Seats   Total capacity\n");
@@ -77,8 +107,52 @@ public class Model {
         return sb.toString();
     }
 
-    public boolean createFlight(String from, String to, String seats){
+    public boolean createFlight(String from, String to, String seats, String str_date){
         int seats_i = Integer.parseInt(seats);
-        return this.allFlights.add(new Flight(from, to, 0, seats_i));
+        LocalDate date = LocalDate.parse(str_date);
+        return this.allFlights.add(new Flight(from, to, 0, seats_i, date));
+    }
+
+    public String createTrip(List<String> destinations, String start, String end) {
+        List<Flight> res = new ArrayList<>();
+        String code = null;
+        if (isTripPossible(destinations, LocalDate.parse(start), LocalDate.parse(end))) {
+            Random rnd = new Random();
+            int number;
+            for(int i=0; i < destinations.size()-1; i++) {
+                String from = destinations.get(i);
+                String to =  destinations.get(i+1);
+                Flight f;
+                f = getFlight(from, to);
+                res.add(f);
+            }
+            do {
+                number = rnd. nextInt(999999);
+                code = Integer.toString(number);
+            } while(this.allTrips.containsKey(code));
+            allTrips.put(code,res);
+        }
+        return code;
+    }
+
+    public boolean isTripPossible(List<String> destinations, LocalDate start, LocalDate end) {
+        LocalDate day = start;
+        for(int i=0; i < destinations.size()-1; i++) {
+            String from = destinations.get(i);
+            String to =  destinations.get(i+1);
+            day = searchAvailableFlightBetweenDates(from, to, day, end);
+            if(day == null) return false;
+        }
+        return true;
+    }
+
+    public void addTrip(String code, List<Flight> flights) {
+        try {
+            lock.lock();
+            this.allTrips.put(code,flights);
+        }
+        finally {
+            lock.unlock();
+        }
     }
 }

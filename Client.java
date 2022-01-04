@@ -112,4 +112,27 @@ public class Client {
         t.start();
         t.join();
     }
+
+    static void createTrip() {
+        Thread t = new Thread(() -> {
+            try{
+                System.out.println("Insira todas as escalas separadas por '-' : ");
+                String escalas = scin.nextLine();
+                System.out.println("Insira um intervalo de datas da separado por '-' : ");
+                String datas = scin.nextLine();
+                m.send(5,(escalas+";"+datas).getBytes());
+                byte[] b = m.receive(5);
+                if (excecao==0){
+                    System.out.println("\033[1;36m"+ new String(b1)+"\033[0m");
+                    userMenu();
+                }
+                else menu.printExcecao(new String(b1) + "\nErro ao criar uma viagem com escalas.");
+            }
+            catch (IOException e) {
+                e.getMessage();
+            }
+        });
+        t.start();
+        t.join();
+    }
 }

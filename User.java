@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class User {
@@ -5,6 +9,7 @@ public class User {
     private String password;
     private boolean isloggedin;
     private int special;
+    private List<String> reservations;
     ReentrantLock l = new ReentrantLock();
 
     public User(String name, String password, int special) {
@@ -12,6 +17,7 @@ public class User {
         this.password = password;
         this.isloggedin = false;
         this.special = special;
+        this.reservations = new ArrayList<>();
     }
 
     public String getName() {
@@ -64,6 +70,19 @@ public class User {
         }
     }
 
+    public List<String> getReservations() {
+        try {
+            l.lock();
+            return reservations;
+        }
+        finally {
+            l.unlock();
+        }
+    }
+
+    public void addReservation(String code) {
+        this.reservations.add(code);
+    }
 
     public boolean checkPassword(String password) {
         try{
