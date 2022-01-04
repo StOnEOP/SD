@@ -64,12 +64,12 @@ public class Server {
                                 }
                             }
                             else if(frame.tag == 5) { //Fazer uma reserva de voos em escala
-                                String[] tokens = data.split(";"); //Porto-London-Tokyo;Data1-Data2
-                                String[] dests = tokens[0].split("-");
-                                String[] dates = tokens[1].split("-");
+                                String[] tokens = data.split(";"); //Username;Porto-London-Tokyo;Data1-Data2
+                                String[] dests = tokens[1].split("-");
+                                String[] dates = tokens[2].split("-");
                                 List<String> destinations = new ArrayList<>();
                                 for(String dest : dests) destinations.add(dest);
-                                String code = model.createTrip(destinations, dates[1], dates[2]);
+                                String code = model.createTrip(tokens[0],destinations, dates[1], dates[2]);
                                 if(code != null) {
                                     connection.send(frame.tag,String.valueOf(flag).getBytes());
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());

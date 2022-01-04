@@ -113,7 +113,7 @@ public class Model {
         return this.allFlights.add(new Flight(from, to, 0, seats_i, date));
     }
 
-    public String createTrip(List<String> destinations, String start, String end) {
+    public String createTrip(String username, List<String> destinations, String start, String end) {
         List<Flight> res = new ArrayList<>();
         String code = null;
         if (isTripPossible(destinations, LocalDate.parse(start), LocalDate.parse(end))) {
@@ -131,6 +131,7 @@ public class Model {
                 code = Integer.toString(number);
             } while(this.allTrips.containsKey(code));
             allTrips.put(code,res);
+            allUsers.get(username).addReservation(code);
         }
         return code;
     }
