@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +8,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Model {
     private Map<String, User> allUsers;
     private List<Flight> allFlights;
+    private List<LocalDate> blockedDates;
     private ReentrantLock lock = new ReentrantLock();
 
     public Model() {
         this.allUsers = new HashMap<>();
         this.allFlights = new ArrayList<>();
+        this.blockedDates = new ArrayList<LocalDate>();
     }
 
     public boolean userLogin(String name, String password) {
@@ -41,8 +44,11 @@ public class Model {
         lock.lock();
         try {
             boolean exists = allUsers.containsKey(u.getName());
-            if(!exists) allUsers.put(u.getName(),u);
-            return u.getName();
+            if(!exists){ 
+                allUsers.put(u.getName(),u);
+                return u.getName();
+            }
+            return null;
         }
         finally {
             lock.unlock();
@@ -60,7 +66,8 @@ public class Model {
 
     }
 
-    public boolean searchFlight(String from, String to) {
+    public boolean searchFlight(String from, String to, String data1, String data2) {
+        // ver se data é valida e nao esta encerrado
         for(int i = 0; i < this.allFlights.size(); i++){
             if(allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to))
                 return true;
@@ -80,5 +87,9 @@ public class Model {
     public boolean createFlight(String from, String to, String seats){
         int seats_i = Integer.parseInt(seats);
         return this.allFlights.add(new Flight(from, to, 0, seats_i));
+    }
+
+    public boolean addNewBlockedDate(LocalDate date){
+        return this.blockedDates.add(date);
     }
 }
