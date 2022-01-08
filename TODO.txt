@@ -1,3 +1,17 @@
+<<<<<<< HEAD
 Onde se grava o estado do programa??
 
 IDEIA : 
+=======
+- Por o utilizador a dar as escalas todas
+- Ter reservas com um codigo de reserva (Local+data? - PORLIS010421) Assim conseguimos tirar a data e o voo para o cliente poder cancelar.
+- Cancelar reservas
+- Adicionar o que fazer apos reservar um voo (incrementar lugares)
+
+
+
+Map(DATA, VOOS)
+Lista de voos:
+Porto, lisboa 300
+Madrid, Lisboa 500
+>>>>>>> bbdbf5bb821822bddb76aa0da0997daf461bc041
