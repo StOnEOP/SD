@@ -1,4 +1,3 @@
-import java.time.LocalDate;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Flight {
@@ -6,15 +5,28 @@ public class Flight {
     public String to;
     public int seats_taken;
     public int total_capacity;
-    public LocalDate date;
     ReentrantLock l = new ReentrantLock();
 
-    public Flight(String from, String to, int seats_taken, int total_capacity, LocalDate date) {
+
+    public Flight(String from, String to){
+        this.from = from;
+        this.to = to;
+        this.seats_taken = 0;
+        this.total_capacity = 0;
+    }
+
+    public Flight(String from, String to, int seats_taken, int total_capacity) {
         this.from = from;
         this.to = to;
         this.seats_taken = seats_taken;
         this.total_capacity = total_capacity;
-        this.date = date;
+    }
+
+    public Flight(Flight f) {
+        this.from = f.getFrom();
+        this.to = f.getTo();
+        this.seats_taken = f.getSeatsTaken();
+        this.total_capacity = f.getTotalCapacity();
     }
 
     public String getFrom() {
@@ -33,16 +45,6 @@ public class Flight {
             return to;
         }
         finally{
-            l.unlock();
-        }
-    }
-
-    public LocalDate getDate() {
-        try {
-            l.lock();
-            return date;
-        }
-        finally {
             l.unlock();
         }
     }
@@ -86,5 +88,9 @@ public class Flight {
         sb.append(this.seats_taken+"\t");
         sb.append(this.total_capacity);
         return sb.toString();
+    }
+
+    public Flight clone(){
+        return new Flight(this);
     }
 }
