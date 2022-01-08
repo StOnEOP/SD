@@ -2,3 +2,10 @@
 - Ter reservas com um codigo de reserva (Local+data? - PORLIS010421) Assim conseguimos tirar a data e o voo para o cliente poder cancelar.
 - Cancelar reservas
 - Adicionar o que fazer apos reservar um voo (incrementar lugares)
+
+
+
+Map(DATA, VOOS)
+Lista de voos:
+Porto, lisboa 300
+Madrid, Lisboa 500

@@ -11,7 +11,7 @@ public class Model {
     private Map<String, User> allUsers;
     private List<Flight> allFlights;
     private List<LocalDate> blockedDates;
-    private Map<String,List<Flight>> allTrips; //String: código de reserva, List: voos de uma viagem
+    private Map<String,List<Flight>> allTrips; // String: código de reserva, List: voos de uma viagem
     private ReentrantLock lock = new ReentrantLock();
 
     public Model() {
