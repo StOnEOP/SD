@@ -7,6 +7,10 @@ import java.util.Scanner;
 
 import src.ui.Menu;
 
+/*
+ *  Client:  -
+ */
+
 public class Client {
     private static Desmultiplexer desmultiplexer;
     private static Menu menu = new Menu();
