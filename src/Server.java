@@ -3,7 +3,6 @@ package src;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDate;
 import java.util.*;
 
 import src.business.Model;
@@ -31,8 +30,6 @@ public class Server {
                         try {
                             if (frame.tag == 0) { // Registo
                                 String id = model.createUser(data);
-                                int special = model.getUser(id).getSpecial(); // Possivelmente nao deveria ser assim,
-                                                                              // mas para ja fica
                                 System.out.println("Replying to: " + id);
                                 if (id == null) {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
@@ -40,7 +37,6 @@ public class Server {
                                 } else {
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag, "Registo Concluído!!".getBytes());
-                                    connection.send(frame.tag, ("Especial: " + special).getBytes());
                                 }
                             } else if (frame.tag == 1) { // Login
                                 String[] tokens = data.split(" ");
@@ -54,27 +50,8 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao fazer login!").getBytes());
                                 }
-                            } else if (frame.tag == 2) { // Pedir Voo (Nao esta completo, o utilizador tem de dar todas as escalas)
-                                String[] tokens = data.split(" ");
-                                boolean r = model.searchFlight(tokens[0], tokens[1], tokens[2], tokens[3]);
-                                if (r) {
-                                    connection.send(frame.tag, String.valueOf(1).getBytes());
-                                    connection.send(frame.tag, ("Voo Encontrado").getBytes());
-                                } else {
-                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
-                                    connection.send(frame.tag, ("Erro ao encontrar voo").getBytes());
-                                }
-                            } else if (frame.tag == 3) { // Pedir Lista Voos
-                                String allflights = model.allFlightsToString();
-                                if (allflights != null) {
-                                    connection.send(frame.tag, String.valueOf(1).getBytes());
-                                    connection.send(frame.tag, allflights.getBytes());
-                                } else {
-                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
-                                    connection.send(frame.tag, ("Erro ao pedir lista de voos!").getBytes());
-                                }
                             }
-                            else if (frame.tag == 4) { // Fazer uma reserva de voos em escala
+                            else if (frame.tag == 2) { // Fazer uma reserva de voos em escala
                                 String[] tokens = data.split(";"); // Username;Porto-London-Tokyo;Data1-Data2
                                 String[] dests = tokens[1].split("-");
                                 String[] dates = tokens[2].split("-");
@@ -89,8 +66,17 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao fazer uma reserva!").getBytes());
                                 }
+                            } else if (frame.tag == 3) { // Pedir Lista Voos
+                                String allflights = model.allFlightsToString();
+                                if (allflights != null) {
+                                    connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    connection.send(frame.tag, allflights.getBytes());
+                                } else {
+                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
+                                    connection.send(frame.tag, ("Erro ao pedir lista de voos!").getBytes());
+                                }
                             }
-                            else if (frame.tag == 5) { // Cancelar uma reserva
+                            else if (frame.tag == 4) { // Cancelar uma reserva
                                 String tokens[] = data.split(" ");
                                 boolean r = model.cancelTrip(tokens[0], tokens[1]);
                                 if(r){
@@ -102,10 +88,10 @@ public class Server {
                                     connection.send(frame.tag, ("Erro ao cancelar reserva").getBytes());
                                 }
                             }
-                            else if (frame.tag == 6) { // Adicionar Voo
+                            else if (frame.tag == 5) { // Adicionar Voo
                                 String[] tokens = data.split(" ");
-                                boolean r = model.createFlight(tokens[0], tokens[1], tokens[2], tokens[3]);
-                                if (r) {
+                                boolean r = model.createFlight(tokens[0], tokens[1], tokens[2]);
+                                if(r){
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag, ("Novo voo adicionado!").getBytes());
                                 } else {
@@ -113,17 +99,12 @@ public class Server {
                                     connection.send(frame.tag, ("Erro ao criar voo!").getBytes());
                                 }
                             }
-                            else if (frame.tag == 7) { // Encerrar dia
-                                String[] tokens = data.split(" ");
-                                LocalDate date = LocalDate.of(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]),
-                                        Integer.parseInt(tokens[2]));
-                                if (data != null && date.isAfter(LocalDate.now())) {
-                                    if (model.addNewBlockedDate(date)) {
-                                        connection.send(frame.tag, String.valueOf(1).getBytes());
-                                        connection.send(frame.tag,
-                                                ("Data de encerramento adicionada com sucesso!").getBytes());
-                                    }
-                                } else {
+                            else if (frame.tag == 6) { // Encerrar dia
+                                if(model.endingDay()){
+                                    connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    connection.send(frame.tag, ("Data de encerramento adicionada com sucesso!").getBytes());
+                                }
+                                else{
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao adicionar data de encerramento!").getBytes());
                                 }

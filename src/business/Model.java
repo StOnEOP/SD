@@ -204,23 +204,40 @@ public class Model {
 
     // Método:
     public boolean cancelTrip(String username, String code) {
-        if (!allUsers.containsKey(code))
-            return false; // Data da trip == CurrentDay
-        allUsers.get(username).removeReservation(code);
-        for (Flight f : allTrips.get(code)) {
-            f.removeSeat();
+        // Dado um codigo de viagem vamos ver se a viagem pode ser cancelada comparando a data da mesma (DONE)
+        // Apos ter a data, se for possivel cancelar vamos guardar todos os voos para diminuir os lugares ocupados (DONE)
+        // Apos isso removemos a key com o codigo do mapa
+        List<Flight> lf = this.allTrips.get(code);
+        int flights = 0;
+        Boolean ispossible = false;
+        LocalDate data = null;
+
+        for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
+            if (entry.getKey().isAfter(this.currentDay.minusDays(1)))
+                for (int i = 0; i < lf.size() && !ispossible; i++)
+                    if (entry.getValue().contains(lf.get(i))) {
+                        if (data == null || entry.getKey().isBefore(data)) {
+                            data = entry.getKey();
+                            ispossible = true;
+                        }
+                    }
+                if (ispossible)
+                    break;
         }
-        allTrips.remove(code);
-        return true;
+
+        if (ispossible && allUsers.containsKey(code)) {
+            for (Flight f : lf) {
+                f.removeSeat();
+            }
+            allUsers.get(username).removeReservation(code);
+            allTrips.remove(code);
+            return true;
+        }
+        return false;
     }
 
-    // Método:
-    public boolean addNewBlockedDate(LocalDate date) {
-        return this.blockedDates.add(date);
-    }
-
-    // Método:
-    public boolean endingDay(LocalDate date) {
+    // Método
+    public boolean endingDay() {
         this.currentDay.plusDays(1);
         return true;
     }
