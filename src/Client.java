@@ -1,6 +1,7 @@
 package src;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -16,7 +17,7 @@ public class Client {
     private static Menu menu = new Menu();
     private static Scanner sc = new Scanner(System.in);
 
-    public void run() {
+    private static void run() {
         menu.message("\n\nBem vindo ao sistema!!!\n");
         homeMenu();
     }
@@ -301,5 +302,13 @@ public class Client {
     private static void exit() {
         menu.message("\nAté uma próxima...");
         menu.setExit(true);
+    }
+
+    public static void main(String[] args) throws Exception {
+        sc = new Scanner(System.in);
+        Socket s = new Socket("localhost", 12345);
+        desmultiplexer = new Desmultiplexer(new TaggedConnection(s));
+        desmultiplexer.start();
+        run();
     }
 }

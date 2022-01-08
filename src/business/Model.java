@@ -213,7 +213,7 @@ public class Model {
         LocalDate data = null;
 
         for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
-            if (entry.getKey().isAfter(this.currentDay.minusDays(1)))
+            if (entry.getKey().isAfter(this.currentDay.minusDays(1)) && lf != null)
                 for (int i = 0; i < lf.size() && !ispossible; i++)
                     if (entry.getValue().contains(lf.get(i))) {
                         if (data == null || entry.getKey().isBefore(data)) {

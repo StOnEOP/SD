@@ -1,3 +1,3 @@
-Onde se grava o estado do programa??
-
-IDEIA : 
+Manter nome de utilizador no cliente
+Alterar a leitura dos voos com escala
+Fazer mais testes

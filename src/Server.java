@@ -42,7 +42,7 @@ public class Server {
                                 String[] tokens = data.split(" ");
                                 if (model.userLogin(tokens[0], tokens[1])) {
                                     int special = model.getUser(tokens[0]).getSpecial(); // Possivelmente nao deveria ser assim, mas para ja fica
-                                    System.out.println("Replying to: " + data);
+                                    System.out.println("Replying to: " + tokens[0]);
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag, ("Login Concluído!!").getBytes());
                                     connection.send(frame.tag, ("Especial: " + special).getBytes());
@@ -57,7 +57,7 @@ public class Server {
                                 String[] dates = tokens[2].split("-");
                                 List<String> destinations = new ArrayList<>();
                                 for(String dest : dests) destinations.add(dest);
-                                String code = model.createTrip(tokens[0],destinations, dates[1], dates[2]);
+                                String code = model.createTrip(tokens[0],destinations, dates[0], dates[1]);
                                 if(code != null) {
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
