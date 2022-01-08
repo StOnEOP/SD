@@ -1,5 +1,10 @@
 package src.business;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,19 +13,39 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+/*
+ *  Model:  -
+ */
+
 public class Model {
+    LocalDate currentDay = LocalDate.now();
     private Map<String, User> allUsers;
     private List<Flight> allFlights;
-    private List<LocalDate> blockedDates;
+    private Map<LocalDate, List<Flight>> allDatedFlights;
     private Map<String, List<Flight>> allTrips; // String: código de reserva, List: voos de uma viagem
     private ReentrantLock lock = new ReentrantLock();
 
     public Model() {
         this.allUsers = new HashMap<>();
         this.allFlights = new ArrayList<>();
-        this.blockedDates = new ArrayList<LocalDate>();
+        this.allDatedFlights = new HashMap<>();
+        this.allTrips = new HashMap<>();
+
+        this.allFlights.add(new Flight("Porto", "Lisboa"));
+        this.allFlights.add(new Flight("Porto", "Barcelona"));
+        this.allFlights.add(new Flight("Lisboa", "Nova Iorque"));
+        this.allFlights.add(new Flight("Nova Iorque", "Toronto"));
+        this.allFlights.add(new Flight("Barcelona", "Amesterdão"));
+        this.allFlights.add(new Flight("Lisboa", "Paris"));
+
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 5), cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 6), cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 7), cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 10), cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 02, 5), cloneList(this.allFlights));
     }
 
+    // Método:
     public boolean userLogin(String name, String password) {
         lock.lock();
         try {
@@ -33,6 +58,7 @@ public class Model {
         }
     }
 
+    // Método:
     public User parseLine(String data) {
         int special = 0;
         String[] tokens = data.split(" ");
@@ -42,6 +68,7 @@ public class Model {
         return new User(tokens[0], tokens[1], special);
     }
 
+    // Método:
     public String createUser(String data) { // throws userjaexiste?
         User u = parseLine(data);
         lock.lock();
@@ -57,6 +84,7 @@ public class Model {
         }
     }
 
+    // Método:
     public User getUser(String nome) {
         lock.lock();
         try {
@@ -67,6 +95,7 @@ public class Model {
 
     }
 
+    // Método:
     public boolean searchFlight(String from, String to, String data1, String data2) {
         // ver se data é valida e nao esta encerrado
         for (int i = 0; i < this.allFlights.size(); i++) {
@@ -76,20 +105,24 @@ public class Model {
         return false;
     }
 
+    // Método:
     public LocalDate searchAvailableFlightBetweenDates(String from, String to, LocalDate start, LocalDate end) {
-        for (int i = 0; i < this.allFlights.size(); i++) {
-            if (allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to)
-                    && (allFlights.get(i).getDate().isEqual(start) || allFlights.get(i).getDate().isEqual(end) ||
-                            (allFlights.get(i).getDate().isAfter(start) && allFlights.get(i).getDate().isBefore(end)))
-                    && allFlights.get(i).isFull())
-                return allFlights.get(i).getDate();
+        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart.plusDays(1)) {
+            List<Flight> flights = this.allDatedFlights.get(dstart);
+            for (int i = 0; i < flights.size(); i++) {
+                if (flights.get(i).getFrom().equals(from) && flights.get(i).getTo().equals(to)
+                        && !flights.get(i).isFull())
+                    return dstart;
+            }
         }
         return null;
     }
 
-    public int getFlightIndex(String from, String to) {
-        for (int i = 0; i < this.allFlights.size(); i++) {
-            if (allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to)) {
+    // Método:
+    public int getFlightIndex(String from, String to, LocalDate data) {
+        List<Flight> flights = this.allDatedFlights.get(data);
+        for (int i = 0; i < flights.size(); i++) {
+            if (flights.get(i).getFrom().equals(from) && flights.get(i).getTo().equals(to)) {
                 try {
                     lock.lock();
                     return i;
@@ -101,32 +134,35 @@ public class Model {
         return -1;
     }
 
+    // Método:
     public String allFlightsToString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("From     To      Ocupied Seats   Total capacity\n");
+        sb.append("From     To      Occupied Seats   Total capacity\n");
         for (int i = 0; i < this.allFlights.size(); i++) {
             sb.append(allFlights.get(i).toString());
         }
         return sb.toString();
     }
 
-    public boolean createFlight(String from, String to, String seats, String str_date) {
+    // Método:
+    public boolean createFlight(String from, String to, String seats) {
         int seats_i = Integer.parseInt(seats);
-        LocalDate date = LocalDate.parse(str_date);
-        return this.allFlights.add(new Flight(from, to, 0, seats_i, date));
+        return this.allFlights.add(new Flight(from, to, 0, seats_i));
     }
 
+    // Método:
     public String createTrip(String username, List<String> destinations, String start, String end) {
         List<Flight> res = new ArrayList<>();
         String code = null;
-        if (isTripPossible(destinations, LocalDate.parse(start), LocalDate.parse(end))) {
+        List<LocalDate> days = isTripPossible(destinations, LocalDate.parse(start), LocalDate.parse(end));
+        if (days.size() == destinations.size()) {
             Random rnd = new Random();
             int number;
             for (int i = 0; i < destinations.size() - 1; i++) {
                 String from = destinations.get(i);
                 String to = destinations.get(i + 1);
-                int index = getFlightIndex(from, to);
-                Flight f = allFlights.get(index);
+                int index = getFlightIndex(from, to, days.get(i));
+                Flight f = allDatedFlights.get(days.get(i)).get(index);
                 res.add(f);
                 f.addSeat();
             }
@@ -140,21 +176,36 @@ public class Model {
         return code;
     }
 
-    public boolean isTripPossible(List<String> destinations, LocalDate start, LocalDate end) {
+    // Método:
+    public void addIfAbsentFlight(LocalDate start, LocalDate end) {
+        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart.plusDays(1)) {
+            List<Flight> f = new ArrayList<>();
+            for (int i = 0; i < this.allFlights.size(); i++)
+                f.add(allFlights.get(i).clone());
+            allDatedFlights.putIfAbsent(dstart, f);
+        }
+    }
+
+    // Método:
+    public List<LocalDate> isTripPossible(List<String> destinations, LocalDate start, LocalDate end) {
         LocalDate day = start;
+        List<LocalDate> days = new ArrayList<>();
         for (int i = 0; i < destinations.size() - 1; i++) {
             String from = destinations.get(i);
             String to = destinations.get(i + 1);
+            addIfAbsentFlight(start, end);
             day = searchAvailableFlightBetweenDates(from, to, day, end);
             if (day == null)
-                return false;
+                break;
+            days.add(day);
         }
-        return true;
+        return days;
     }
 
+    // Método:
     public boolean cancelTrip(String username, String code) {
         if (!allUsers.containsKey(code))
-            return false;
+            return false; // Data da trip == CurrentDay
         allUsers.get(username).removeReservation(code);
         for (Flight f : allTrips.get(code)) {
             f.removeSeat();
@@ -163,7 +214,40 @@ public class Model {
         return true;
     }
 
+    // Método:
     public boolean addNewBlockedDate(LocalDate date) {
         return this.blockedDates.add(date);
+    }
+
+    // Método:
+    public boolean endingDay(LocalDate date) {
+        this.currentDay.plusDays(1);
+        return true;
+    }
+
+    // Método:
+    public List<Flight> cloneList(List<Flight> flight) {
+        List<Flight> f = new ArrayList<>();
+        for (int i = 0; i < flight.size(); i++)
+            f.add(flight.get(i).clone());
+        return f;
+    }
+
+    // Método:
+    public Model loadData(String file) throws IOException, ClassNotFoundException {
+        FileInputStream f = new FileInputStream(file);
+        ObjectInputStream o = new ObjectInputStream(f);
+        Model m = (Model) o.readObject();
+        o.close();
+        return m;
+    }
+
+    // Método:
+    public void saveData(String file, Model model) throws IOException {
+        FileOutputStream f = new FileOutputStream(file);
+        ObjectOutputStream o = new ObjectOutputStream(f);
+        o.writeObject(model);
+        o.flush(); // para ter a certeza que todos os dados foram gravados
+        o.close();
     }
 }

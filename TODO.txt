@@ -1,4 +1,3 @@
-- Por o utilizador a dar as escalas todas
-- Ter reservas com um codigo de reserva (Local+data? - PORLIS010421) Assim conseguimos tirar a data e o voo para o cliente poder cancelar.
-- Cancelar reservas
-- Adicionar o que fazer apos reservar um voo (incrementar lugares)
+Onde se grava o estado do programa??
+
+IDEIA : 

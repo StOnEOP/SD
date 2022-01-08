@@ -8,6 +8,10 @@ import java.util.*;
 
 import src.business.Model;
 
+/*
+ *  Server:  -
+ */
+
 public class Server {
     private static Model model;
 
@@ -69,7 +73,36 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao pedir lista de voos!").getBytes());
                                 }
-                            } else if (frame.tag == 4) { // Adicionar Voo
+                            }
+                            else if (frame.tag == 4) { // Fazer uma reserva de voos em escala
+                                String[] tokens = data.split(";"); // Username;Porto-London-Tokyo;Data1-Data2
+                                String[] dests = tokens[1].split("-");
+                                String[] dates = tokens[2].split("-");
+                                List<String> destinations = new ArrayList<>();
+                                for(String dest : dests) destinations.add(dest);
+                                String code = model.createTrip(tokens[0],destinations, dates[1], dates[2]);
+                                if(code != null) {
+                                    connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
+                                }
+                                else{
+                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
+                                    connection.send(frame.tag, ("Erro ao fazer uma reserva!").getBytes());
+                                }
+                            }
+                            else if (frame.tag == 5) { // Cancelar uma reserva
+                                String tokens[] = data.split(" ");
+                                boolean r = model.cancelTrip(tokens[0], tokens[1]);
+                                if(r){
+                                    connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    connection.send(frame.tag, ("Reserva com o código: " + tokens[1] + " cancelada.").getBytes());
+                                }
+                                else{
+                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
+                                    connection.send(frame.tag, ("Erro ao cancelar reserva").getBytes());
+                                }
+                            }
+                            else if (frame.tag == 6) { // Adicionar Voo
                                 String[] tokens = data.split(" ");
                                 boolean r = model.createFlight(tokens[0], tokens[1], tokens[2], tokens[3]);
                                 if (r) {
@@ -79,7 +112,8 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao criar voo!").getBytes());
                                 }
-                            } else if (frame.tag == 5) { // Encerrar dia
+                            }
+                            else if (frame.tag == 7) { // Encerrar dia
                                 String[] tokens = data.split(" ");
                                 LocalDate date = LocalDate.of(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]),
                                         Integer.parseInt(tokens[2]));
@@ -93,29 +127,9 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao adicionar data de encerramento!").getBytes());
                                 }
-                            } else if (frame.tag == 6) { // Cancelar reserva
-                            } else if (frame.tag == 5) { // Fazer uma reserva de voos em escala
-                                String[] tokens = data.split(";"); // Username;Porto-London-Tokyo;Data1-Data2
-                                String[] dests = tokens[1].split("-");
-                                String[] dates = tokens[2].split("-");
-                                List<String> destinations = new ArrayList<>();
-                                for (String dest : dests)
-                                    destinations.add(dest);
-                                String code = model.createTrip(tokens[0], destinations, dates[1], dates[2]);
-                                if (code != null) {
-                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
-                                    connection.send(frame.tag, ("Reserva adicionada com o código: " + code).getBytes());
-                                }
-                            } else if (frame.tag == 6) { // Cancelar uma reserva
-                                String tokens[] = data.split(" ");
-                                boolean r = model.cancelTrip(tokens[0], tokens[1]);
-                                if (r) {
-                                    connection.send(frame.tag, String.valueOf(flag).getBytes());
-                                    connection.send(frame.tag,
-                                            ("Reserva com o código: " + tokens[1] + " cancelada.").getBytes());
-                                }
                             }
-                        } catch (IOException e) {
+                        }
+                        catch (IOException e){
                             e.getMessage();
                         }
                     }
