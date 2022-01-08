@@ -1,3 +1,5 @@
+package src.business;
+
 import java.time.LocalDate;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,21 +20,19 @@ public class Flight {
     }
 
     public String getFrom() {
-        try{
+        try {
             l.lock();
             return from;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
 
     public String getTo() {
-        try{
+        try {
             l.lock();
             return to;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
@@ -41,8 +41,7 @@ public class Flight {
         try {
             l.lock();
             return date;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -51,8 +50,7 @@ public class Flight {
         try {
             l.lock();
             return seats_taken;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -61,8 +59,7 @@ public class Flight {
         try {
             l.lock();
             return total_capacity;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -79,11 +76,11 @@ public class Flight {
         this.seats_taken--;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.from+"\t");
-        sb.append(this.to+"\t");
-        sb.append(this.seats_taken+"\t");
+        sb.append(this.from + "\t");
+        sb.append(this.to + "\t");
+        sb.append(this.seats_taken + "\t");
         sb.append(this.total_capacity);
         return sb.toString();
     }

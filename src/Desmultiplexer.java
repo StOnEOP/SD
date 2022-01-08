@@ -1,3 +1,5 @@
+package src;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -6,14 +8,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
-
-public class Demultiplexer implements AutoCloseable {
+public class Desmultiplexer implements AutoCloseable {
     private final TaggedConnection conn;
     private final Lock lock = new ReentrantLock();
-    private  final Map<Integer,Entry> buf = new HashMap<>();
+    private final Map<Integer, Entry> buf = new HashMap<>();
     private IOException exception = null;
-
 
     private class Entry {
         int waiters = 0;
@@ -23,19 +22,20 @@ public class Demultiplexer implements AutoCloseable {
 
     private Entry get(int tag) {
         Entry e = buf.get(tag);
-        if(e == null) {
+        if (e == null) {
             e = new Entry();
-            buf.put(tag,e);
+            buf.put(tag, e);
         }
+
         return e;
     }
 
-    public Demultiplexer(TaggedConnection conn) {
+    public Desmultiplexer(TaggedConnection conn) {
         this.conn = conn;
     }
 
     public void start() throws IOException {
-        new Thread(()-> {
+        new Thread(() -> {
             try {
                 for (;;) {
                     TaggedConnection.Frame frame = conn.receive();
@@ -48,32 +48,32 @@ public class Demultiplexer implements AutoCloseable {
                         lock.unlock();
                     }
                 }
-            }
-            catch (IOException e)  {
+            } catch (IOException e) {
                 lock.lock();
                 try {
                     exception = e;
-                    buf.forEach((k,v) -> v.cond.signalAll());
-                }
-                finally {
+                    buf.forEach((k, v) -> v.cond.signalAll());
+                } finally {
                     lock.unlock();
                 }
             }
-
         }).start();
     }
+
     public void send(TaggedConnection.Frame frame) throws IOException {
         conn.send(frame);
     }
-    public void send(int tag,byte[] data) throws IOException {
-        conn.send(tag,data);
+
+    public void send(int tag, byte[] data) throws IOException {
+        conn.send(tag, data);
     }
-    public byte[] receive(int tag) throws IOException, InterruptedException{
+
+    public byte[] receive(int tag) throws IOException, InterruptedException {
         lock.lock();
         try {
             Entry e = get(tag);
             e.waiters++;
-            for(;;) {
+            for (;;) {
                 if (!e.queue.isEmpty()) {
                     byte[] res = e.queue.poll();
                     e.waiters--;
@@ -85,11 +85,11 @@ public class Demultiplexer implements AutoCloseable {
                     throw exception;
                 e.cond.await();
             }
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
+
     public void close() throws IOException {
         conn.close();
     }

@@ -1,21 +1,26 @@
+package src;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class TaggedConnection implements AutoCloseable{
+public class TaggedConnection implements AutoCloseable {
     private Socket s;
     private DataInputStream in;
     private DataOutputStream out;
     private ReentrantLock rl;
     private ReentrantLock wl;
 
-
     public static class Frame {
         public final int tag;
-        public final byte[] data;   
-        public Frame(int tag, byte[] data) {this.tag = tag; this.data = data;}
+        public final byte[] data;
+
+        public Frame(int tag, byte[] data) {
+            this.tag = tag;
+            this.data = data;
+        }
     }
 
     public TaggedConnection(Socket socket) throws IOException {
@@ -27,7 +32,7 @@ public class TaggedConnection implements AutoCloseable{
     }
 
     public void send(Frame frame) throws IOException {
-        send(frame.tag,frame.data);
+        send(frame.tag, frame.data);
     }
 
     public void send(int tag, byte[] data) throws IOException {
@@ -37,8 +42,7 @@ public class TaggedConnection implements AutoCloseable{
             out.writeInt(tag);
             out.write(data);
             out.flush();
-        }
-        finally {
+        } finally {
             wl.unlock();
         }
     }
@@ -49,9 +53,8 @@ public class TaggedConnection implements AutoCloseable{
             byte[] data = new byte[in.readInt()];
             int tag = in.readInt();
             in.readFully(data);
-            return new Frame(tag,data);
-        }
-        finally {
+            return new Frame(tag, data);
+        } finally {
             rl.unlock();
         }
     }

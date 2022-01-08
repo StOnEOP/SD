@@ -1,3 +1,5 @@
+package src.ui;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -8,7 +10,7 @@ import java.util.Scanner;
  */
 
 public class Menu {
-    
+
     public interface Handler {
         public void execute();
     }

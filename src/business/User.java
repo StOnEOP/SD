@@ -1,7 +1,7 @@
+package src.business;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class User {
@@ -21,51 +21,46 @@ public class User {
     }
 
     public String getName() {
-        try{
+        try {
             l.lock();
             return name;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
 
     public String getPassword() {
-        try{
+        try {
             l.lock();
             return password;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
 
     public void setIsLoggedIn(boolean isloggedin) {
-        try{
+        try {
             l.lock();
             this.isloggedin = isloggedin;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
 
     public int getSpecial() {
-        try{
+        try {
             l.lock();
             return special;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
 
     public boolean getLoggedIn() {
-        try{
+        try {
             l.lock();
             return isloggedin;
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
@@ -74,8 +69,7 @@ public class User {
         try {
             l.lock();
             return reservations;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -89,11 +83,10 @@ public class User {
     }
 
     public boolean checkPassword(String password) {
-        try{
+        try {
             l.lock();
             return password.equals(this.password);
-        }
-        finally{
+        } finally {
             l.unlock();
         }
     }
