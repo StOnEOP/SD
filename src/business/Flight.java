@@ -17,7 +17,7 @@ public class Flight {
         this.from = from;
         this.to = to;
         this.seats_taken = 0;
-        this.total_capacity = 0;
+        this.total_capacity = 50;
     }
 
     public Flight(String from, String to, int seats_taken, int total_capacity) {

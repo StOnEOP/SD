@@ -54,9 +54,9 @@ public class Server {
                             else if (frame.tag == 2) { // Fazer uma reserva de voos em escala
                                 String[] tokens = data.split(";"); // Username;Porto-London-Tokyo;Data1-Data2
                                 String[] dests = tokens[1].split("-");
-                                String[] dates = tokens[2].split("-");
+                                String[] dates = tokens[2].split("/");
                                 List<String> destinations = new ArrayList<>();
-                                for(String dest : dests) destinations.add(dest);
+                                for(String dest : dests) destinations.add(dest); 
                                 String code = model.createTrip(tokens[0],destinations, dates[0], dates[1]);
                                 if(code != null) {
                                     connection.send(frame.tag, String.valueOf(1).getBytes());

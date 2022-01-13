@@ -1,10 +1,5 @@
 package src.business;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +26,8 @@ public class Model {
         this.allDatedFlights = new HashMap<>();
         this.allTrips = new HashMap<>();
 
+        this.allUsers.put("admin", new User("admin", "123", 1));
+
         this.allFlights.add(new Flight("Porto", "Lisboa"));
         this.allFlights.add(new Flight("Porto", "Barcelona"));
         this.allFlights.add(new Flight("Lisboa", "Nova Iorque"));
@@ -43,6 +40,10 @@ public class Model {
         this.allDatedFlights.put(LocalDate.of(2022, 01, 7), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 01, 10), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 02, 5), cloneList(this.allFlights));
+    }
+
+    public LocalDate getCurrentDay(){
+        return this.currentDay;
     }
 
     // Método:
@@ -107,7 +108,7 @@ public class Model {
 
     // Método:
     public LocalDate searchAvailableFlightBetweenDates(String from, String to, LocalDate start, LocalDate end) {
-        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart.plusDays(1)) {
+        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart = dstart.plusDays(1)) {
             List<Flight> flights = this.allDatedFlights.get(dstart);
             for (int i = 0; i < flights.size(); i++) {
                 if (flights.get(i).getFrom().equals(from) && flights.get(i).getTo().equals(to)
@@ -139,7 +140,7 @@ public class Model {
         StringBuilder sb = new StringBuilder();
         sb.append("From     To      Occupied Seats   Total capacity\n");
         for (int i = 0; i < this.allFlights.size(); i++) {
-            sb.append(allFlights.get(i).toString());
+            sb.append(allFlights.get(i).toString() + "\n");
         }
         return sb.toString();
     }
@@ -152,10 +153,15 @@ public class Model {
 
     // Método:
     public String createTrip(String username, List<String> destinations, String start, String end) {
-        List<Flight> res = new ArrayList<>();
         String code = null;
-        List<LocalDate> days = isTripPossible(destinations, LocalDate.parse(start), LocalDate.parse(end));
-        if (days.size() == destinations.size()) {
+        LocalDate dstart = LocalDate.parse(start);
+        LocalDate dend = LocalDate.parse(end);
+        if (dend.isBefore(this.currentDay)) return code; //Caso tente fazer reserva antes do dia atual ERRO
+        if (dstart.isBefore(this.currentDay))
+            dstart = this.currentDay; 
+        List<Flight> res = new ArrayList<>();
+        List<LocalDate> days = isTripPossible(destinations, dstart, dend);
+        if (days.size() == destinations.size() - 1) {
             Random rnd = new Random();
             int number;
             for (int i = 0; i < destinations.size() - 1; i++) {
@@ -178,7 +184,7 @@ public class Model {
 
     // Método:
     public void addIfAbsentFlight(LocalDate start, LocalDate end) {
-        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart.plusDays(1)) {
+        for (LocalDate dstart = start; dstart.isBefore(end) || dstart.isEqual(end); dstart = dstart.plusDays(1)) {
             List<Flight> f = new ArrayList<>();
             for (int i = 0; i < this.allFlights.size(); i++)
                 f.add(allFlights.get(i).clone());
@@ -208,12 +214,11 @@ public class Model {
         // Apos ter a data, se for possivel cancelar vamos guardar todos os voos para diminuir os lugares ocupados (DONE)
         // Apos isso removemos a key com o codigo do mapa
         List<Flight> lf = this.allTrips.get(code);
-        int flights = 0;
         Boolean ispossible = false;
         LocalDate data = null;
 
         for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
-            if (entry.getKey().isAfter(this.currentDay.minusDays(1)) && lf != null)
+            if ((entry.getKey().isAfter(this.currentDay) || entry.getKey().isEqual(this.currentDay)) && lf != null)
                 for (int i = 0; i < lf.size() && !ispossible; i++)
                     if (entry.getValue().contains(lf.get(i))) {
                         if (data == null || entry.getKey().isBefore(data)) {
@@ -225,7 +230,7 @@ public class Model {
                     break;
         }
 
-        if (ispossible && allUsers.containsKey(code)) {
+        if (ispossible && allUsers.containsKey(username)) { //Meti username pq não entendi bem este containsKey... dantes tinha containsKey(code)
             for (Flight f : lf) {
                 f.removeSeat();
             }
@@ -238,7 +243,7 @@ public class Model {
 
     // Método
     public boolean endingDay() {
-        this.currentDay.plusDays(1);
+        this.currentDay = this.currentDay.plusDays(1);
         return true;
     }
 
@@ -248,23 +253,5 @@ public class Model {
         for (int i = 0; i < flight.size(); i++)
             f.add(flight.get(i).clone());
         return f;
-    }
-
-    // Método:
-    public Model loadData(String file) throws IOException, ClassNotFoundException {
-        FileInputStream f = new FileInputStream(file);
-        ObjectInputStream o = new ObjectInputStream(f);
-        Model m = (Model) o.readObject();
-        o.close();
-        return m;
-    }
-
-    // Método:
-    public void saveData(String file, Model model) throws IOException {
-        FileOutputStream f = new FileOutputStream(file);
-        ObjectOutputStream o = new ObjectOutputStream(f);
-        o.writeObject(model);
-        o.flush(); // para ter a certeza que todos os dados foram gravados
-        o.close();
     }
 }

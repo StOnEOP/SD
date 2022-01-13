@@ -211,7 +211,7 @@ public class Client {
                 String user = sc.nextLine();
                 menu.message("Insira todas as escalas separadas por '-': ");
                 String escalas = sc.nextLine();
-                menu.message("Insira um intervalo de datas da separado por '-': ");
+                menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
                 String datas = sc.nextLine();
 
                 desmultiplexer.send(2, (user + ";" + escalas + ";" + datas).getBytes());
