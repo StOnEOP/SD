@@ -273,7 +273,7 @@ public class Client {
     private static void flightList() {
         Thread t = new Thread(() -> {
             try {
-                menu.message("\nVoos disponíveis: ");
+                menu.message("\n***** Lista de voos *****");
 
                 demultiplexer.send(3, (" ").getBytes());
 

@@ -147,7 +147,7 @@ public class Model {
         try {
             lock.lock();
             StringBuilder sb = new StringBuilder();
-            sb.append("From\tTo\n");
+            sb.append("** From\t\t** To\n");
             for (int i = 0; i < this.allFlights.size(); i++) {
                 sb.append(allFlights.get(i).toString() + "\n");
             }
