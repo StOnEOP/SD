@@ -79,11 +79,23 @@ public class User {
     }
 
     public void addReservation(String code) {
-        this.reservations.add(code);
+        try {
+            l.lock();
+            this.reservations.add(code);
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public void removeReservation(String code) {
-        this.reservations.remove(code);
+        try {
+            l.lock();
+            this.reservations.remove(code);
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     public boolean checkPassword(String password) {

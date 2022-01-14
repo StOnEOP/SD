@@ -3,7 +3,7 @@ package src.business;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
- *  Fligth:  -
+ *  Flight:  -
  */
 
 public class Flight {
@@ -87,16 +87,34 @@ public class Flight {
 
     // Método: Verifica se o voo está com a capacidade máxima
     public boolean isFull() {
-        return this.seats_taken == this.total_capacity;
+        try {
+            l.lock();
+            return this.seats_taken == this.total_capacity;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     // Método: Adiciona mais um lugar ocupado
     public void addSeat() {
-        this.seats_taken++;
+        try {
+            l.lock();
+            this.seats_taken++;
+        }
+        finally {
+            l.unlock();
+        }
     }
 
     // Método: Remove um lugar ocupado
     public void removeSeat() {
-        this.seats_taken--;
+        try {
+            l.lock();
+            this.seats_taken--;
+        }
+        finally {
+            l.unlock();
+        }
     }
 }
