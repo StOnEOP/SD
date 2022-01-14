@@ -3,7 +3,7 @@ package src.business;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
- *  Fligth:  -
+ *  Flight:  -
  */
 
 public class Flight {

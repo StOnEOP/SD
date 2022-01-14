@@ -8,7 +8,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Desmultiplexer implements AutoCloseable {
+public class Demultiplexer implements AutoCloseable {
     private final TaggedConnection conn;
     private final Lock lock = new ReentrantLock();
     private final Map<Integer, Entry> buf = new HashMap<>();
@@ -30,7 +30,7 @@ public class Desmultiplexer implements AutoCloseable {
         return e;
     }
 
-    public Desmultiplexer(TaggedConnection conn) {
+    public Demultiplexer(TaggedConnection conn) {
         this.conn = conn;
     }
 

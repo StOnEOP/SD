@@ -13,7 +13,7 @@ import src.ui.Menu;
  */
 
 public class Client {
-    private static Desmultiplexer desmultiplexer;
+    private static Demultiplexer demultiplexer;
     private static Menu menu = new Menu();
     private static Scanner sc = new Scanner(System.in);
 
@@ -53,11 +53,11 @@ public class Client {
     // Método: Efetua o registo do utilizador
     private static void signup(String username, String password) {
         try {
-            desmultiplexer.send(0, (username + " " + password + " ").getBytes());
+            demultiplexer.send(0, (username + " " + password + " ").getBytes());
 
-            byte[] b1 = desmultiplexer.receive(0);
+            byte[] b1 = demultiplexer.receive(0);
             int status = Integer.parseInt(new String(b1));
-            byte[] b2 = desmultiplexer.receive(0);
+            byte[] b2 = demultiplexer.receive(0);
 
             if (status == 1)
                 menu.message("\n" + new String(b2) + "\n");
@@ -87,14 +87,14 @@ public class Client {
     // Método: Efetua a autenticação do utilizador
     private static int login(String username, String password) {
         try {
-            desmultiplexer.send(1, (username + " " + password + " ").getBytes());
+            demultiplexer.send(1, (username + " " + password + " ").getBytes());
 
-            byte[] b1 = desmultiplexer.receive(1);
+            byte[] b1 = demultiplexer.receive(1);
             int status = Integer.parseInt(new String(b1));
-            byte[] b2 = desmultiplexer.receive(1);
+            byte[] b2 = demultiplexer.receive(1);
 
             if (status == 1) {
-                byte[] b3 = desmultiplexer.receive(1);
+                byte[] b3 = demultiplexer.receive(1);
                 String[] tokens = new String(b3).split(" ");
 
                 menu.message("\n" + new String(b2) + "\n");
@@ -135,11 +135,11 @@ public class Client {
                 menu.message("Insira o total de lugares no avião: ");
                 String seats = sc.nextLine();
 
-                desmultiplexer.send(5, (from + " " + to + " " + seats).getBytes());
+                demultiplexer.send(5, (from + " " + to + " " + seats).getBytes());
 
-                byte[] b1 = desmultiplexer.receive(5);
+                byte[] b1 = demultiplexer.receive(5);
                 int status = Integer.parseInt(new String(b1));
-                byte[] b2 = desmultiplexer.receive(5);
+                byte[] b2 = demultiplexer.receive(5);
 
                 if (status == 1)
                     menu.message("\n" + new String(b2) + "\n");
@@ -168,11 +168,11 @@ public class Client {
         int dia = Integer.parseInt(sc.nextLine());
 
         try {
-            desmultiplexer.send(6, (ano + " " + mes + " " + dia).getBytes());
+            demultiplexer.send(6, (ano + " " + mes + " " + dia).getBytes());
 
-            byte[] b1 = desmultiplexer.receive(6);
+            byte[] b1 = demultiplexer.receive(6);
             int status = Integer.parseInt(new String(b1));
-            byte[] b2 = desmultiplexer.receive(6);
+            byte[] b2 = demultiplexer.receive(6);
 
             if (status == 1)
                 menu.message("\n" + new String(b2) + "\n");
@@ -214,11 +214,11 @@ public class Client {
                 menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
                 String datas = sc.nextLine();
 
-                desmultiplexer.send(2, (user + ";" + escalas + ";" + datas).getBytes());
+                demultiplexer.send(2, (user + ";" + escalas + ";" + datas).getBytes());
 
-                byte[] b1 = desmultiplexer.receive(2);
+                byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
-                byte[] b2 = desmultiplexer.receive(2);
+                byte[] b2 = demultiplexer.receive(2);
 
                 if (status == 1)
                     menu.message("\n" + new String(b2) + "\n");
@@ -246,11 +246,11 @@ public class Client {
                 menu.message("Insira o código de reserva: ");
                 String code = sc.nextLine();
 
-                desmultiplexer.send(4, (user + " " + code).getBytes());
+                demultiplexer.send(4, (user + " " + code).getBytes());
 
-                byte[] b1 = desmultiplexer.receive(4);
+                byte[] b1 = demultiplexer.receive(4);
                 int status = Integer.parseInt(new String(b1));
-                byte[] b2 = desmultiplexer.receive(4);
+                byte[] b2 = demultiplexer.receive(4);
 
                 if (status == 1)
                     menu.message("\n" + new String(b2) + "\n");
@@ -275,11 +275,11 @@ public class Client {
             try {
                 menu.message("\nVoos disponíveis: ");
 
-                desmultiplexer.send(3, (" ").getBytes());
+                demultiplexer.send(3, (" ").getBytes());
 
-                byte[] b1 = desmultiplexer.receive(3);
+                byte[] b1 = demultiplexer.receive(3);
                 int status = Integer.parseInt(new String(b1));
-                byte[] b2 = desmultiplexer.receive(3);
+                byte[] b2 = demultiplexer.receive(3);
 
                 if (status == 1)
                     menu.message("\n" + new String(b2) + "\n");
@@ -307,8 +307,8 @@ public class Client {
     public static void main(String[] args) throws Exception {
         sc = new Scanner(System.in);
         Socket s = new Socket("localhost", 12345);
-        desmultiplexer = new Desmultiplexer(new TaggedConnection(s));
-        desmultiplexer.start();
+        demultiplexer = new Demultiplexer(new TaggedConnection(s));
+        demultiplexer.start();
         run();
     }
 }
