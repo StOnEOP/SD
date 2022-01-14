@@ -146,9 +146,25 @@ public class Model {
     }
 
     // Método:
+    public boolean containsFlight(String from, String to) {
+        for(Flight f : this.allFlights)
+            if (f.getFrom().equals(from) && f.getTo().equals(to))
+                return true;
+        return false;        
+    }
+
+    // Método:
     public boolean createFlight(String from, String to, String seats) {
         int seats_i = Integer.parseInt(seats);
-        return this.allFlights.add(new Flight(from, to, 0, seats_i));
+        Flight f = new Flight(from, to, 0, seats_i);
+        if(!containsFlight(from,to)) { 
+            this.allFlights.add(f);
+            for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
+                entry.getValue().add(f);
+            }
+            return true;
+        }
+        return false;        
     }
 
     // Método:
