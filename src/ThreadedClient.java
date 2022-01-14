@@ -2,38 +2,51 @@ package src;
 
 import java.net.Socket;
 
-import src.business.Model;
 
 public class ThreadedClient {
     public static void main(String[] args) throws Exception {
         Socket s = new Socket("localhost", 12345);
-        Demultiplexer m = new Demultiplexer(new TaggedConnection(s));
-        m.start();
+        Demultiplexer m1 = new Demultiplexer(new TaggedConnection(s));
+        Demultiplexer m2 = new Demultiplexer(new TaggedConnection(s));
+        m1.start();
+        m2.start();
 
         Thread[] threads = {
 
             new Thread(() -> {
                 try  {
-                    // send request
-                    m.send(1, "Ola".getBytes());
+                    m1.send(0, ("armando 123").getBytes());
                     Thread.sleep(100);
-                    // get reply
-                    byte[] data = m.receive(1);
-                    System.out.println("(1) Reply: " + new String(data));
+                    byte[] data = m1.receive(0);
+                    System.out.println("(0) Reply Armando: " + new String(data));
+                    m1.send(1, ("armando 123").getBytes());
+                    Thread.sleep(100);
+                    data = m1.receive(1);
+                    System.out.println("(1) Reply Armando: " + new String(data));
+                    m1.send(2, ("armando;Lisboa-Braga;2022-01-14/2022-01-14").getBytes());
+                    Thread.sleep(100);
+                    data = m1.receive(2);
+                    System.out.println("(2) Reply Armando: " + new String(data));
                 }  catch (Exception ignored) {}
             }),
-
+            
             new Thread(() -> {
                 try  {
-                    // send request
-                    m.send(3, "Hello".getBytes());
+                    m2.send(0, ("stone 123").getBytes());
                     Thread.sleep(100);
-                    // get reply
-                    byte[] data = m.receive(3);
-                    System.out.println("(2) Reply: " + new String(data));
+                    byte[] data = m2.receive(0);
+                    System.out.println("(0) Reply Stone: " + new String(data));
+                    m2.send(1, ("stone 123").getBytes());
+                    Thread.sleep(100);
+                    data = m2.receive(1);
+                    System.out.println("(1) Reply Stone: " + new String(data));
+                    m2.send(2, ("stone;Lisboa-Braga;2022-01-14/2022-01-14").getBytes());
+                    Thread.sleep(100);
+                    data = m2.receive(2);
+                    System.out.println("(2) Reply Stone: " + new String(data));
                 }  catch (Exception ignored) {}
             }),
-
+            /*
             new Thread(() -> {
                 try  {
                     // One-way
@@ -66,11 +79,12 @@ public class ThreadedClient {
                     }
                 } catch (Exception ignored) {}
             })
-
+            */
         };
 
         for (Thread t: threads) t.start();
         for (Thread t: threads) t.join();
-        m.close();
+        m1.close();
+        m2.close();
     }
 }

@@ -34,12 +34,14 @@ public class Model {
         this.allFlights.add(new Flight("Nova Iorque", "Toronto"));
         this.allFlights.add(new Flight("Barcelona", "Amesterdão"));
         this.allFlights.add(new Flight("Lisboa", "Paris"));
+        this.allFlights.add(new Flight("Lisboa", "Braga", 0, 1));
 
         this.allDatedFlights.put(LocalDate.of(2022, 01, 5), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 01, 6), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 01, 7), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 01, 10), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 02, 5), cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 14),cloneList(this.allFlights));
     }
 
     public LocalDate getCurrentDay(){
@@ -99,11 +101,16 @@ public class Model {
     // Método:
     public boolean searchFlight(String from, String to, String data1, String data2) {
         // ver se data é valida e nao esta encerrado
-        for (int i = 0; i < this.allFlights.size(); i++) {
-            if (allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to))
-                return true;
-        }
-        return false;
+        try {
+            lock.lock();
+            for (int i = 0; i < this.allFlights.size(); i++) {
+                if (allFlights.get(i).getFrom().equals(from) && allFlights.get(i).getTo().equals(to))
+                    return true;
+            }
+            return false;
+        } finally {
+            lock.unlock();
+        }    
     }
 
     // Método:
@@ -137,12 +144,17 @@ public class Model {
 
     // Método:
     public String allFlightsToString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("From     To      Occupied Seats   Total capacity\n");
-        for (int i = 0; i < this.allFlights.size(); i++) {
-            sb.append(allFlights.get(i).toString() + "\n");
+        try {
+            lock.lock();
+            StringBuilder sb = new StringBuilder();
+            sb.append("From\tTo\n");
+            for (int i = 0; i < this.allFlights.size(); i++) {
+                sb.append(allFlights.get(i).toString() + "\n");
+            }
+            return sb.toString();
+        } finally {
+            lock.unlock();
         }
-        return sb.toString();
     }
 
     // Método:
@@ -157,14 +169,19 @@ public class Model {
     public boolean createFlight(String from, String to, String seats) {
         int seats_i = Integer.parseInt(seats);
         Flight f = new Flight(from, to, 0, seats_i);
-        if(!containsFlight(from,to)) { 
-            this.allFlights.add(f);
-            for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
-                entry.getValue().add(f);
+        try {
+            lock.lock();
+            if(!containsFlight(from,to)) { 
+                this.allFlights.add(f);
+                for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
+                    entry.getValue().add(f);
+                }
+                return true;
             }
-            return true;
-        }
-        return false;        
+            return false;
+        } finally {
+            lock.unlock();
+        }            
     }
 
     // Método:
@@ -172,30 +189,35 @@ public class Model {
         String code = null;
         LocalDate dstart = LocalDate.parse(start);
         LocalDate dend = LocalDate.parse(end);
-        if (dend.isBefore(this.currentDay)) return code; //Caso tente fazer reserva antes do dia atual ERRO
-        if (dstart.isBefore(this.currentDay))
-            dstart = this.currentDay; 
-        List<Flight> res = new ArrayList<>();
-        List<LocalDate> days = isTripPossible(destinations, dstart, dend);
-        if (days.size() == destinations.size() - 1) {
-            Random rnd = new Random();
-            int number;
-            for (int i = 0; i < destinations.size() - 1; i++) {
-                String from = destinations.get(i);
-                String to = destinations.get(i + 1);
-                int index = getFlightIndex(from, to, days.get(i));
-                Flight f = allDatedFlights.get(days.get(i)).get(index);
-                res.add(f);
-                f.addSeat();
+        try {
+            lock.lock();
+            if (dend.isBefore(this.currentDay)) return code; //Caso tente fazer reserva antes do dia atual ERRO
+            if (dstart.isBefore(this.currentDay))
+                dstart = this.currentDay; 
+            List<Flight> res = new ArrayList<>();
+            List<LocalDate> days = isTripPossible(destinations, dstart, dend);
+            if (days.size() == destinations.size() - 1) {
+                Random rnd = new Random();
+                int number;
+                for (int i = 0; i < destinations.size() - 1; i++) {
+                    String from = destinations.get(i);
+                    String to = destinations.get(i + 1);
+                    int index = getFlightIndex(from, to, days.get(i));
+                    Flight f = allDatedFlights.get(days.get(i)).get(index);
+                    res.add(f);
+                    f.addSeat();
+                }
+                do {
+                    number = rnd.nextInt(999999);
+                    code = Integer.toString(number);
+                } while (this.allTrips.containsKey(code));
+                allTrips.put(code, res);
+                allUsers.get(username).addReservation(code);
             }
-            do {
-                number = rnd.nextInt(999999);
-                code = Integer.toString(number);
-            } while (this.allTrips.containsKey(code));
-            allTrips.put(code, res);
-            allUsers.get(username).addReservation(code);
+            return code;
+        } finally {
+            lock.unlock();
         }
-        return code;
     }
 
     // Método:
@@ -229,45 +251,60 @@ public class Model {
         // Dado um codigo de viagem vamos ver se a viagem pode ser cancelada comparando a data da mesma (DONE)
         // Apos ter a data, se for possivel cancelar vamos guardar todos os voos para diminuir os lugares ocupados (DONE)
         // Apos isso removemos a key com o codigo do mapa
-        List<Flight> lf = this.allTrips.get(code);
         Boolean ispossible = false;
         LocalDate data = null;
-
-        for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
-            if ((entry.getKey().isAfter(this.currentDay) || entry.getKey().isEqual(this.currentDay)) && lf != null)
-                for (int i = 0; i < lf.size() && !ispossible; i++)
-                    if (entry.getValue().contains(lf.get(i))) {
-                        if (data == null || entry.getKey().isBefore(data)) {
-                            data = entry.getKey();
-                            ispossible = true;
+        try {
+            lock.lock();
+            List<Flight> lf = this.allTrips.get(code);
+            for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
+                if ((entry.getKey().isAfter(this.currentDay) || entry.getKey().isEqual(this.currentDay)) && lf != null)
+                    for (int i = 0; i < lf.size() && !ispossible; i++)
+                        if (entry.getValue().contains(lf.get(i))) {
+                            if (data == null || entry.getKey().isBefore(data)) {
+                                data = entry.getKey();
+                                ispossible = true;
+                            }
                         }
-                    }
-                if (ispossible)
-                    break;
+                    if (ispossible)
+                        break;
+            }
+
+            if (ispossible && allUsers.containsKey(username)) { //Meti username pq não entendi bem este containsKey... dantes tinha containsKey(code)
+                for (Flight f : lf) {
+                    f.removeSeat();
+                }
+                allUsers.get(username).removeReservation(code);
+                allTrips.remove(code);
+                return true;
+            }
+            return false;
+        } finally {
+            lock.unlock();
         }
 
-        if (ispossible && allUsers.containsKey(username)) { //Meti username pq não entendi bem este containsKey... dantes tinha containsKey(code)
-            for (Flight f : lf) {
-                f.removeSeat();
-            }
-            allUsers.get(username).removeReservation(code);
-            allTrips.remove(code);
-            return true;
-        }
-        return false;
     }
 
     // Método
     public boolean endingDay() {
-        this.currentDay = this.currentDay.plusDays(1);
-        return true;
+        try {
+            lock.lock();
+            this.currentDay = this.currentDay.plusDays(1);
+            return true;
+        } finally {
+            lock.unlock();
+        }
     }
 
     // Método:
     public List<Flight> cloneList(List<Flight> flight) {
-        List<Flight> f = new ArrayList<>();
-        for (int i = 0; i < flight.size(); i++)
-            f.add(flight.get(i).clone());
-        return f;
+        try {
+            lock.lock();
+            List<Flight> f = new ArrayList<>();
+            for (int i = 0; i < flight.size(); i++)
+                f.add(flight.get(i).clone());
+            return f;
+        } finally {
+            lock.unlock();
+        }
     }
 }

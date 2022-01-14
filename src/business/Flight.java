@@ -75,9 +75,7 @@ public class Flight {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.from + "\t");
-        sb.append(this.to + "\t");
-        sb.append(this.seats_taken + "\t");
-        sb.append(this.total_capacity);
+        sb.append(this.to);
         return sb.toString();
     }
 
