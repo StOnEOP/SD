@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.*;
 
 import src.business.Model;
+import src.business.User;
 
 /*
  *  Server:  -
@@ -13,6 +14,7 @@ import src.business.Model;
 
 public class Server {
     private static Model model;
+    private static int j = 0;
 
     public static void main(String[] args) throws Exception {
         ServerSocket ss = new ServerSocket(12345);
@@ -20,6 +22,9 @@ public class Server {
 
         while (true) {
             Socket socket = ss.accept();
+            j++;
+            System.out.println("j " + j);
+
             TaggedConnection connection = new TaggedConnection(socket);
 
             Runnable worker = () -> {
@@ -41,7 +46,8 @@ public class Server {
                             } else if (frame.tag == 1) { // Login
                                 String[] tokens = data.split(" ");
                                 if (model.userLogin(tokens[0], tokens[1])) {
-                                    int special = model.getUser(tokens[0]).getSpecial(); // Possivelmente nao deveria ser assim, mas para ja fica
+                                    model.setLoggedIn(tokens[0]);
+                                    int special = model.getSpecial(tokens[0]);
                                     System.out.println("Replying to: " + tokens[0]);
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag, ("Login realizado com sucesso").getBytes());
@@ -59,11 +65,15 @@ public class Server {
                                 for(String dest : dests) destinations.add(dest); 
                                 String code = model.createTrip(tokens[0],destinations, dates[0], dates[1]);
                                 if(code != null) {
+                                    System.out.println("Primeiro");
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    System.out.println("Segundo");
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
+                                    System.out.println("Terceiro");
                                 }
                                 else
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
+                                    connection.send(frame.tag, ("Erro ao reservar voo").getBytes());
                             } else if (frame.tag == 3) { // Pedir Lista Voos
                                 String allflights = model.allFlightsToString();
                                 if (allflights != null) {
@@ -100,11 +110,11 @@ public class Server {
                             else if (frame.tag == 6) { // Encerrar dia
                                 if(model.endingDay()){
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
-                                    connection.send(frame.tag, ("Data de encerramento adicionada com sucesso!").getBytes());
+                                    connection.send(frame.tag, ("Dia encerrado com sucesso!").getBytes());
                                 }
                                 else{
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
-                                    connection.send(frame.tag, ("Erro ao adicionar data de encerramento!").getBytes());
+                                    connection.send(frame.tag, ("Erro ao encerrar o dia!").getBytes());
                                 }
                             }
                         }

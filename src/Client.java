@@ -160,15 +160,8 @@ public class Client {
 
     // Método: Acabar o dia atual
     private static void endDay() {
-        menu.message("\nInsira o ano: ");
-        int ano = Integer.parseInt(sc.nextLine());
-        menu.message("Insira o mês: ");
-        int mes = Integer.parseInt(sc.nextLine());
-        menu.message("Insira o dia: ");
-        int dia = Integer.parseInt(sc.nextLine());
-
         try {
-            demultiplexer.send(6, (ano + " " + mes + " " + dia).getBytes());
+            demultiplexer.send(6, ("").getBytes());
 
             byte[] b1 = demultiplexer.receive(6);
             int status = Integer.parseInt(new String(b1));

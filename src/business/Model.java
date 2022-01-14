@@ -53,10 +53,30 @@ public class Model {
         lock.lock();
         try {
             if (allUsers.containsKey(name)) {
-                return allUsers.get(name).checkPassword(password);
+                return !allUsers.get(name).getLoggedIn() && allUsers.get(name).checkPassword(password);
             }
             return false;
         } finally {
+            lock.unlock();
+        }
+    }
+
+    // Método:
+    public void setLoggedIn(String name){
+        lock.lock();
+        try{
+            this.allUsers.get(name).setIsLoggedIn(true);
+        } finally{
+            lock.unlock();
+        }
+    }
+
+    // Método
+    public int getSpecial(String name){
+        lock.lock();
+        try{
+            return this.allUsers.get(name).getSpecial();
+        } finally{
             lock.unlock();
         }
     }

@@ -1,7 +1,2 @@
 Manter nome de utilizador no cliente (Dunno what is this!)
-Alterar a leitura dos voos com escala (Feito mas tem que se escrever, por exemplo, 2022-01-13/2022-01-19)
-Fix MENU (Pedir dia no encerramento).
 Fazer mais testes
-Testar concorrência (Criar scripts)
-
-Ao reservar ele escreve no AllDatedFlights e AllTrips... não no AllFlights... ou seja, não há lugares marcados no AllFlights e nos outros sim
