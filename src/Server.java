@@ -44,11 +44,11 @@ public class Server {
                                     int special = model.getUser(tokens[0]).getSpecial(); // Possivelmente nao deveria ser assim, mas para ja fica
                                     System.out.println("Replying to: " + tokens[0]);
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
-                                    connection.send(frame.tag, ("Login Concluído!!").getBytes());
+                                    connection.send(frame.tag, ("Login realizado com sucesso").getBytes());
                                     connection.send(frame.tag, ("Especial: " + special).getBytes());
                                 } else {
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
-                                    connection.send(frame.tag, ("Erro ao fazer login!").getBytes());
+                                    connection.send(frame.tag, ("Erro no login").getBytes());
                                 }
                             }
                             else if (frame.tag == 2) { // Fazer uma reserva de voos em escala
@@ -62,10 +62,8 @@ public class Server {
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
                                 }
-                                else{
+                                else
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
-                                    connection.send(frame.tag, ("Erro ao fazer uma reserva!").getBytes());
-                                }
                             } else if (frame.tag == 3) { // Pedir Lista Voos
                                 String allflights = model.allFlightsToString();
                                 if (allflights != null) {

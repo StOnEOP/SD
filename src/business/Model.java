@@ -138,7 +138,7 @@ public class Model {
     // Método:
     public String allFlightsToString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("From     To      Occupied Seats   Total capacity\n");
+        sb.append("** From\t\t** To\n");
         for (int i = 0; i < this.allFlights.size(); i++) {
             sb.append(allFlights.get(i).toString() + "\n");
         }

@@ -74,10 +74,11 @@ public class Flight {
     // Auxiliaries
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.from + "\t");
-        sb.append(this.to + "\t");
-        sb.append(this.seats_taken + "\t");
-        sb.append(this.total_capacity);
+        if (this.from.length() < 8)
+            sb.append(" " + this.from + "\t\t");
+        else
+            sb.append(" " + this.from + "\t");
+        sb.append(" " + this.to);
         return sb.toString();
     }
 
