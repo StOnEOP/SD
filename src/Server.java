@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.*;
 
 import src.business.Model;
-import src.business.User;
 
 /*
  *  Server:  -

@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 public class Model {
-    LocalDate currentDay = LocalDate.now();
+    LocalDate currentDay = LocalDate.of(2022, 01, 01);
     private Map<String, User> allUsers;
     private List<Flight> allFlights;
     private Map<LocalDate, List<Flight>> allDatedFlights;
