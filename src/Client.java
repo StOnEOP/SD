@@ -152,34 +152,26 @@ public class Client {
 
     // Método: Criar um novo voo
     private static void createFlight() {
-        Thread t = new Thread(() -> {
-            try {
-                menu.message("\nInsira o local de partida: ");
-                String from = sc.nextLine();
-                menu.message("Inserir o local de chegada: ");
-                String to = sc.nextLine();
-                menu.message("Insira o total de lugares no avião: ");
-                String seats = sc.nextLine();
-
-                demultiplexer.send(5, (from + ";" + to + ";" + seats).getBytes());
-
-                byte[] b1 = demultiplexer.receive(5);
-                int status = Integer.parseInt(new String(b1));
-                byte[] b2 = demultiplexer.receive(5);
-
-                if (status == 1)
-                    menu.message("\n" + new String(b2) + "\n");
-                else
-                    menu.message("\n" + new String(b2) + "\n");
-                homeAdminMenu();
-            } catch (IOException | InterruptedException e) {
-                e.getMessage();
-            }
-        });
-        t.start();
         try {
-            t.join();
-        } catch (InterruptedException e) {
+            menu.message("\nInsira o local de partida: ");
+            String from = sc.nextLine();
+            menu.message("Inserir o local de chegada: ");
+            String to = sc.nextLine();
+            menu.message("Insira o total de lugares no avião: ");
+            String seats = sc.nextLine();
+
+            demultiplexer.send(5, (from + ";" + to + ";" + seats).getBytes());
+
+            byte[] b1 = demultiplexer.receive(5);
+            int status = Integer.parseInt(new String(b1));
+            byte[] b2 = demultiplexer.receive(5);
+
+            if (status == 1)
+                menu.message("\n" + new String(b2) + "\n");
+            else
+                menu.message("\n" + new String(b2) + "\n");
+            homeAdminMenu();
+        } catch (IOException | InterruptedException e) {
             e.getMessage();
         }
     }
@@ -236,6 +228,7 @@ public class Client {
 
         Thread t = new Thread(() -> {
             try {
+                Thread.sleep(3000);
                 demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
                 byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
@@ -260,59 +253,40 @@ public class Client {
 
     // Método: Cancelar uma viagem já reservada pelo cliente
     private static void cancelTrip() {
-        Thread t = new Thread(() -> {
-            try {
-                menu.message("Insira o código de reserva: ");
-                String code = sc.nextLine();
-
-                demultiplexer.send(4, (idU + " " + code).getBytes());
-
-                byte[] b1 = demultiplexer.receive(4);
-                int status = Integer.parseInt(new String(b1));
-                byte[] b2 = demultiplexer.receive(4);
-
-                if (status == 1)
-                    menu.message("\n" + new String(b2) + "\n");
-                else
-                    menu.message("\n" + new String(b2) + "\n");
-                homeClientMenu();
-            } catch (IOException | InterruptedException e) {
-                e.getMessage();
-            }
-        });
-        t.start();
         try {
-            t.join();
-        } catch (InterruptedException e) {
+            menu.message("Insira o código de reserva: ");
+            String code = sc.nextLine();
+
+            demultiplexer.send(4, (idU + " " + code).getBytes());
+
+            byte[] b1 = demultiplexer.receive(4);
+            int status = Integer.parseInt(new String(b1));
+            byte[] b2 = demultiplexer.receive(4);
+
+            if (status == 1)
+                menu.message("\n" + new String(b2) + "\n");
+            else
+                menu.message("\n" + new String(b2) + "\n");
+            homeClientMenu();
+        } catch (IOException | InterruptedException e) {
             e.getMessage();
         }
     }
 
     // Método: Obter a lista de todos os voos atuais
     private static void flightList() {
-        Thread t = new Thread(() -> {
-            try {
-                menu.message("\n***** Lista de voos *****");
-
-                demultiplexer.send(3, (" ").getBytes());
-
-                byte[] b1 = demultiplexer.receive(3);
-                int status = Integer.parseInt(new String(b1));
-                byte[] b2 = demultiplexer.receive(3);
-
-                if (status == 1)
-                    menu.message("\n" + new String(b2) + "\n");
-                else
-                    menu.message("\n" + new String(b2) + "\n");
-                homeClientMenu();
-            } catch (IOException | InterruptedException e) {
-                e.getMessage();
-            }
-        });
-        t.start();
         try {
-            t.join();
-        } catch (InterruptedException e) {
+            menu.message("\n***** Lista de voos *****");
+            demultiplexer.send(3, (" ").getBytes());
+            byte[] b1 = demultiplexer.receive(3);
+            int status = Integer.parseInt(new String(b1));
+            byte[] b2 = demultiplexer.receive(3);
+            if (status == 1)
+                menu.message("\n" + new String(b2) + "\n");
+            else
+                menu.message("\n" + new String(b2) + "\n");
+            homeClientMenu();
+        } catch (IOException | InterruptedException e) {
             e.getMessage();
         }
     }

@@ -75,16 +75,15 @@ public class ThreadedClient {
                     String codigo = resp1[resp1.length - 1];
                     System.out.println("(2) Reply StOnE: " + resp);
                     // Cancelar Reserva
-                    Thread.sleep(2000);
                     m1.send(4, ("stone " + codigo).getBytes());
                     byte[] b6 = m1.receive(4);
                     int status1 = Integer.parseInt(new String(b1));
                     byte[] b7 = m1.receive(4);
 
                     if (status1 == 1)
-                        System.out.println("(4) Reply St0nE V2: " + new String(b6));
+                        System.out.println("(4) Reply St0nE: " + new String(b6));
                     else
-                        System.out.println("(4) Reply St0nE V2: " + new String(b7));
+                        System.out.println("(4) Reply St0nE: " + new String(b7));
                     m1.close();
                 }  catch (Exception ignored) {}
             }),
