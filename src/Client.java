@@ -235,6 +235,7 @@ public class Client {
         Thread t = new Thread(() -> {
             try {
                 running = true;
+                //Thread.sleep(3000);
                 demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
                 byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
