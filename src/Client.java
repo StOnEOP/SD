@@ -224,19 +224,19 @@ public class Client {
 
     // Método: Criar uma viagem nova pelo cliente
     private static void createTrip() {
+        menu.message("Insira todas as escalas separadas por '-': ");
+        String escalas = sc.nextLine();
+        menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
+        String datas = sc.nextLine();
+
+        if ((!escalas.contains("-")) && (!datas.contains("/"))){
+            menu.message("\nParâmetros Errados\n");
+            homeClientMenu();
+        }
+
         Thread t = new Thread(() -> {
             try {
-                menu.message("Insira todas as escalas separadas por '-': ");
-                String escalas = sc.nextLine();
-                menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
-                String datas = sc.nextLine();
-                
-                if ((!escalas.contains("-")) && (!datas.contains("/"))){
-                    menu.message("\nParâmetros Errados\n");
-                    homeClientMenu();
-                } 
                 demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
-
                 byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
                 byte[] b2 = demultiplexer.receive(2);
@@ -245,18 +245,19 @@ public class Client {
                     menu.message("\n" + new String(b2) + "\n");
                 else
                     menu.message("\n" + new String(b2) + "\n");
-                homeClientMenu();
             } catch (IOException | InterruptedException e) {
                 e.getMessage();
             }
         });
         t.start();
+        homeClientMenu();
         try {
             t.join();
         } catch (InterruptedException e) {
             e.getMessage();
         }
     }
+
 
     // Método: Cancelar uma viagem já reservada pelo cliente
     private static void cancelTrip() {
