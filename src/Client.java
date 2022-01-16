@@ -17,7 +17,8 @@ public class Client {
     private static Menu menu = new Menu();
     private static Scanner sc = new Scanner(System.in);
 
-    private static String idU; // Variavel do username do Cliente
+    private static String idU; // Variável do username do Cliente
+    private static boolean running = false; // Variável que indica se tem reservas pendentes 
 
     private static void run() {
         try {
@@ -116,21 +117,26 @@ public class Client {
 
     // Método: Termina a sessão do utilizador
     private static void logout() {
-        try {
-            demultiplexer.send(7, (idU).getBytes());
+        if (!running) {
+            try {
+                demultiplexer.send(7, (idU).getBytes());
 
-            byte[] b1 = demultiplexer.receive(7);
-            int status = Integer.parseInt(new String(b1));
-            byte[] b2 = demultiplexer.receive(7);
+                byte[] b1 = demultiplexer.receive(7);
+                int status = Integer.parseInt(new String(b1));
+                byte[] b2 = demultiplexer.receive(7);
 
-            if (status == 1) {
-                menu.message("\n" + new String(b2) + "\n");
-            } else
-                menu.message("\n" + new String(b2) + "\n");
-        } catch (IOException | InterruptedException e) {
-            e.getMessage();
+                if (status == 1) {
+                    menu.message("\n" + new String(b2) + "\n");
+                } else
+                    menu.message("\n" + new String(b2) + "\n");
+            } catch (IOException | InterruptedException e) {
+                e.getMessage();
+            }
+            homeMenu();
+        } else {
+            menu.message("Impossível terminar sessão!\nReserva de viagem por concluir...\n");
+            homeClientMenu();
         }
-        homeMenu();
     }
 
     // Método: Menu principal do administrador
@@ -228,7 +234,7 @@ public class Client {
 
         Thread t = new Thread(() -> {
             try {
-                Thread.sleep(3000);
+                running = true;
                 demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
                 byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
@@ -238,6 +244,7 @@ public class Client {
                     menu.message("\n" + new String(b2) + "\n");
                 else
                     menu.message("\n" + new String(b2) + "\n");
+                running = false;    
             } catch (IOException | InterruptedException e) {
                 e.getMessage();
             }

@@ -13,7 +13,6 @@ import src.business.Model;
 
 public class Server {
     private static Model model;
-    private static int j = 0;
 
     public static void main(String[] args) throws Exception {
         ServerSocket ss = new ServerSocket(12345);
@@ -21,7 +20,6 @@ public class Server {
 
         while (true) {
             Socket socket = ss.accept();
-            j++;
 
             TaggedConnection connection = new TaggedConnection(socket);
 
