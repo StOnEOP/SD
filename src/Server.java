@@ -60,15 +60,19 @@ public class Server {
                                 String[] dests = tokens[1].split("-");
                                 String[] dates = tokens[2].split("/");
                                 List<String> destinations = new ArrayList<>();
-                                for(String dest : dests) destinations.add(dest); 
-                                String code = model.createTrip(tokens[0],destinations, dates[0], dates[1]);
+                                String code = null;
+                                if (dests.length > 1) {
+                                    for(String dest : dests) destinations.add(dest); 
+                                    code = model.createTrip(tokens[0],destinations, dates[0], dates[1]); //Isto também tem que retornar o dias?
+                                }
                                 if(code != null) {
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
                                 }
-                                else
+                                else { 
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao reservar voo").getBytes());
+                                }    
                             } else if (frame.tag == 3) { // Pedir Lista Voos
                                 String allflights = model.allFlightsToString();
                                 if (allflights != null) {
@@ -92,7 +96,7 @@ public class Server {
                                 }
                             }
                             else if (frame.tag == 5) { // Adicionar Voo
-                                String[] tokens = data.split(" ");
+                                String[] tokens = data.split(";");
                                 boolean r = model.createFlight(tokens[0], tokens[1], tokens[2]);
                                 if(r){
                                     connection.send(frame.tag, String.valueOf(1).getBytes());

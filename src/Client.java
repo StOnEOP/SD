@@ -161,7 +161,7 @@ public class Client {
                 menu.message("Insira o total de lugares no avião: ");
                 String seats = sc.nextLine();
 
-                demultiplexer.send(5, (from + " " + to + " " + seats).getBytes());
+                demultiplexer.send(5, (from + ";" + to + ";" + seats).getBytes());
 
                 byte[] b1 = demultiplexer.receive(5);
                 int status = Integer.parseInt(new String(b1));
@@ -234,8 +234,7 @@ public class Client {
                 if ((!escalas.contains("-")) && (!datas.contains("/"))){
                     menu.message("\nParâmetros Errados\n");
                     homeClientMenu();
-                }    
-
+                } 
                 demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
 
                 byte[] b1 = demultiplexer.receive(2);
