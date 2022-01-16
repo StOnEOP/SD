@@ -17,9 +17,15 @@ public class Client {
     private static Menu menu = new Menu();
     private static Scanner sc = new Scanner(System.in);
 
+    private static String idU; //Variavel do username do Cliente
+
     private static void run() {
+        try {
         menu.message("\n\nBem vindo ao sistema!!!\n");
         homeMenu();
+        demultiplexer.close();
+        } catch (IOException e) {}
+        
     }
 
     // Método: Menu inicial
@@ -59,7 +65,7 @@ public class Client {
             int status = Integer.parseInt(new String(b1));
             byte[] b2 = demultiplexer.receive(0);
 
-            if (status == 1)
+            if (status == 1) 
                 menu.message("\n" + new String(b2) + "\n");
             else
                 menu.message("\n" + new String(b2) + "\nRegisto não efetuado.\n");
@@ -79,7 +85,7 @@ public class Client {
         if (isAdmin == 1)
             homeAdminMenu();
         else if (isAdmin == 0)
-            homeClientMenu();
+            homeClientMenu();  
         else
             homeMenu();
     }
@@ -94,17 +100,37 @@ public class Client {
             byte[] b2 = demultiplexer.receive(1);
 
             if (status == 1) {
+                idU = username;
                 byte[] b3 = demultiplexer.receive(1);
                 String[] tokens = new String(b3).split(" ");
 
                 menu.message("\n" + new String(b2) + "\n");
                 return Integer.parseInt(new String(tokens[1]));
             } else
-                menu.message("\n" + new String(b2) + "\nErro ao efetuar o login.\n");
+                menu.message("\n" + new String(b2) + "\n");
         } catch (IOException | InterruptedException e) {
             e.getMessage();
         }
         return -1;
+    }
+
+    // Método: Faz Logout do utilizador
+    private static void logout(){
+        try {
+            demultiplexer.send(7, (idU).getBytes());
+
+            byte[] b1 = demultiplexer.receive(7);
+            int status = Integer.parseInt(new String(b1));
+            byte[] b2 = demultiplexer.receive(7);
+
+            if (status == 1) {
+                menu.message("\n" + new String(b2) + "\n");
+            } else
+                menu.message("\n" + new String(b2) + "\n");
+        } catch (IOException | InterruptedException e) {
+            e.getMessage();
+        }
+        homeMenu();
     }
 
     // Método: Menu principal do administrador
@@ -119,7 +145,7 @@ public class Client {
         // Registar handlers
         menu.setHandlers(1, () -> createFlight());
         menu.setHandlers(2, () -> endDay());
-        menu.setHandlers(3, () -> homeMenu());
+        menu.setHandlers(3, () -> logout());
 
         menu.run();
     }
@@ -191,7 +217,7 @@ public class Client {
         menu.setHandlers(1, () -> createTrip());
         menu.setHandlers(2, () -> cancelTrip());
         menu.setHandlers(3, () -> flightList());
-        menu.setHandlers(4, () -> homeMenu());
+        menu.setHandlers(4, () -> logout());
 
         menu.run();
     }
@@ -200,14 +226,17 @@ public class Client {
     private static void createTrip() {
         Thread t = new Thread(() -> {
             try {
-                menu.message("\nInsira o seu nome de Utilizador: ");
-                String user = sc.nextLine();
                 menu.message("Insira todas as escalas separadas por '-': ");
                 String escalas = sc.nextLine();
                 menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
                 String datas = sc.nextLine();
+                
+                if ((!escalas.contains("-")) && (!datas.contains("/"))){
+                    menu.message("\nParâmetros Errados\n");
+                    homeClientMenu();
+                }    
 
-                demultiplexer.send(2, (user + ";" + escalas + ";" + datas).getBytes());
+                demultiplexer.send(2, (idU + ";" + escalas + ";" + datas).getBytes());
 
                 byte[] b1 = demultiplexer.receive(2);
                 int status = Integer.parseInt(new String(b1));
@@ -234,12 +263,10 @@ public class Client {
     private static void cancelTrip() {
         Thread t = new Thread(() -> {
             try {
-                menu.message("\nInsira o seu nome de Utilizador: ");
-                String user = sc.nextLine();
                 menu.message("Insira o código de reserva: ");
                 String code = sc.nextLine();
 
-                demultiplexer.send(4, (user + " " + code).getBytes());
+                demultiplexer.send(4, (idU + " " + code).getBytes());
 
                 byte[] b1 = demultiplexer.receive(4);
                 int status = Integer.parseInt(new String(b1));
@@ -293,7 +320,7 @@ public class Client {
 
     // Método: Sair do programa
     private static void exit() {
-        menu.message("\nAté uma próxima...");
+        menu.message("\nAté uma próxima...\n");
         menu.setExit(true);
     }
 

@@ -22,7 +22,6 @@ public class Server {
         while (true) {
             Socket socket = ss.accept();
             j++;
-            System.out.println("j " + j);
 
             TaggedConnection connection = new TaggedConnection(socket);
 
@@ -57,18 +56,15 @@ public class Server {
                                 }
                             }
                             else if (frame.tag == 2) { // Fazer uma reserva de voos em escala
-                                String[] tokens = data.split(";"); // Username;Porto-London-Tokyo;Data1-Data2
+                                String[] tokens = data.split(";");
                                 String[] dests = tokens[1].split("-");
                                 String[] dates = tokens[2].split("/");
                                 List<String> destinations = new ArrayList<>();
                                 for(String dest : dests) destinations.add(dest); 
                                 String code = model.createTrip(tokens[0],destinations, dates[0], dates[1]);
                                 if(code != null) {
-                                    System.out.println("Primeiro");
                                     connection.send(frame.tag, String.valueOf(1).getBytes());
-                                    System.out.println("Segundo");
                                     connection.send(frame.tag,("Reserva adicionada com o código: " + code).getBytes());
-                                    System.out.println("Terceiro");
                                 }
                                 else
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
@@ -114,6 +110,16 @@ public class Server {
                                 else{
                                     connection.send(frame.tag, String.valueOf(-1).getBytes());
                                     connection.send(frame.tag, ("Erro ao encerrar o dia!").getBytes());
+                                }
+                            }
+                            else if (frame.tag == 7) {
+                                if(model.logout(data)) {
+                                    connection.send(frame.tag, String.valueOf(1).getBytes());
+                                    connection.send(frame.tag, ("Logout com sucesso").getBytes());
+                                }
+                                else{
+                                    connection.send(frame.tag, String.valueOf(-1).getBytes());
+                                    connection.send(frame.tag, ("Erro a fazer Logout").getBytes());
                                 }
                             }
                         }
