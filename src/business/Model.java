@@ -10,15 +10,16 @@ import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
- *  Model:  -
+ *  Model:  - Classe que guarda todas as variáveis necessárias para a execução de todo o programa
+ *          - Possui todos os métodos necessários para a execução correta das funcionalidades
  */
 
 public class Model {
-    LocalDate currentDay = LocalDate.of(2022, 01, 01);
-    private Map<String, User> allUsers;
-    private List<Flight> allFlights; //Todas as rotas existentes
-    private Map<LocalDate, List<Flight>> allDatedFlights;
-    private Map<String, List<Flight>> allTrips; // String: código de reserva, List: voos de uma viagem
+    LocalDate currentDay = LocalDate.of(2022, 01, 01); // Dia atual
+    private Map<String, User> allUsers; // Mapa que guarda todos os utilizadores. Key: ID , Value: Utilizador
+    private List<Flight> allFlights; // Lista que guarda todas os voos presentes no sistema
+    private Map<LocalDate, List<Flight>> allDatedFlights; // Mapa que guarda todos os voos por dia. Key: Dia , Value: Voos
+    private Map<String, List<Flight>> allTrips; // Mapa que guarda todas as reservas de voos. Key: Código da reserva , Value: Voo
     private ReentrantLock lock = new ReentrantLock();
 
     public Model() {
@@ -42,11 +43,11 @@ public class Model {
         this.allDatedFlights.put(LocalDate.of(2022, 01, 7), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 01, 10), cloneList(this.allFlights));
         this.allDatedFlights.put(LocalDate.of(2022, 02, 5), cloneList(this.allFlights));
-        this.allDatedFlights.put(LocalDate.of(2022, 01, 14),cloneList(this.allFlights));
+        this.allDatedFlights.put(LocalDate.of(2022, 01, 14), cloneList(this.allFlights));
     }
 
     // Método: Getter do currentDay
-    public LocalDate getCurrentDay(){
+    public LocalDate getCurrentDay() {
         return this.currentDay;
     }
 
@@ -64,21 +65,21 @@ public class Model {
     }
 
     // Método: Muda o estado do Cliente para LoggedIn
-    public void setLoggedIn(String name){
+    public void setLoggedIn(String name) {
         lock.lock();
-        try{
+        try {
             this.allUsers.get(name).setIsLoggedIn(true);
-        } finally{
+        } finally {
             lock.unlock();
         }
     }
 
     // Método: Getter do estatuto do Cliente
-    public int getSpecial(String name){
+    public int getSpecial(String name) {
         lock.lock();
-        try{
+        try {
             return this.allUsers.get(name).getSpecial();
-        } finally{
+        } finally {
             lock.unlock();
         }
     }
@@ -133,17 +134,18 @@ public class Model {
         return null;
     }
 
-    // Método: Retorna o índice onde se encontra um determinado voo 
+    // Método: Retorna o índice onde se encontra um determinado voo
     public int getFlightIndex(String from, String to, LocalDate data) {
         List<Flight> flights = this.allDatedFlights.get(data);
         for (int i = 0; i < flights.size(); i++) {
             if (flights.get(i).getFrom().equals(from) && flights.get(i).getTo().equals(to)) {
-                    return i;
+                return i;
             }
         }
         return -1;
     }
 
+    // Método: Constrói a lista de todos os voos presentes no sistema
     public String allFlightsToString() {
         try {
             lock.lock();
@@ -160,10 +162,10 @@ public class Model {
 
     // Método: Verifica se existe o voo com a partida e destino dadas na lista de voos
     public boolean containsFlight(String from, String to) {
-        for(Flight f : this.allFlights)
+        for (Flight f : this.allFlights)
             if (f.getFrom().equals(from) && f.getTo().equals(to))
                 return true;
-        return false;        
+        return false;
     }
 
     // Método: Administrador adiciona uma nova rota
@@ -173,7 +175,7 @@ public class Model {
             Flight f = new Flight(from, to, 0, seats_i);
             try {
                 lock.lock();
-                if(!containsFlight(from,to)) { 
+                if (!containsFlight(from, to)) {
                     this.allFlights.add(f);
                     for (Map.Entry<LocalDate, List<Flight>> entry : this.allDatedFlights.entrySet()) {
                         entry.getValue().add(f);
@@ -183,10 +185,10 @@ public class Model {
                 return false;
             } finally {
                 lock.unlock();
-            }       
+            }
         } catch (NumberFormatException e) {
             return false;
-        }      
+        }
     }
 
     // Método: Reserva uma viagem
@@ -197,9 +199,10 @@ public class Model {
             LocalDate dend = LocalDate.parse(end);
             try {
                 lock.lock();
-                if (dend.isBefore(this.currentDay)) return code; //Caso tente fazer reserva antes do dia atual ERRO
+                if (dend.isBefore(this.currentDay))
+                    return code; // Caso tente fazer reserva antes do dia atual ERRO
                 if (dstart.isBefore(this.currentDay))
-                    dstart = this.currentDay; 
+                    dstart = this.currentDay;
                 List<Flight> res = new ArrayList<>();
                 List<LocalDate> days = isTripPossible(destinations, dstart, dend);
                 if (days.size() == destinations.size() - 1) {
@@ -224,9 +227,9 @@ public class Model {
             } finally {
                 lock.unlock();
             }
-        } catch (DateTimeParseException e){
+        } catch (DateTimeParseException e) {
             return code;
-        }    
+        }
     }
 
     // Método: Adiciona as rotas existentes numa nova data caso esta não exista
@@ -271,11 +274,11 @@ public class Model {
                                 ispossible = true;
                             }
                         }
-                    if (ispossible)
-                        break;
+                if (ispossible)
+                    break;
             }
 
-            if (ispossible && allUsers.containsKey(username)) { //Meti username pq não entendi bem este containsKey... dantes tinha containsKey(code)
+            if (ispossible && allUsers.containsKey(username)) {
                 for (Flight f : lf) {
                     f.removeSeat();
                 }
@@ -302,12 +305,12 @@ public class Model {
     }
 
     // Método: Faz logout do Cliente
-    public boolean logout(String name){
+    public boolean logout(String name) {
         lock.lock();
-        try{
+        try {
             this.allUsers.get(name).setIsLoggedIn(false);
             return true;
-        } finally{
+        } finally {
             lock.unlock();
         }
     }

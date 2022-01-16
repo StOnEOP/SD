@@ -3,14 +3,15 @@ package src.business;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
- *  Flight:  -
+ *  Flight: - Classe que guarda toda a informação de um voo
+ *          - Possui todos os métodos necessários para alterar as suas variáveis 
  */
 
 public class Flight {
-    public String from;
-    public String to;
-    public int seats_taken;
-    public int total_capacity;
+    public String from; // Local de partida
+    public String to; // Local de destino
+    public int seats_taken; // Lugares ocupados
+    public int total_capacity; // Lotação máxima
     ReentrantLock l = new ReentrantLock();
 
     public Flight(String from, String to) {
@@ -91,8 +92,7 @@ public class Flight {
         try {
             l.lock();
             return this.seats_taken == this.total_capacity;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -102,8 +102,7 @@ public class Flight {
         try {
             l.lock();
             this.seats_taken++;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }
@@ -113,8 +112,7 @@ public class Flight {
         try {
             l.lock();
             this.seats_taken--;
-        }
-        finally {
+        } finally {
             l.unlock();
         }
     }

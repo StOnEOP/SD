@@ -9,7 +9,7 @@ import java.util.Scanner;
 import src.ui.Menu;
 
 /*
- *  Client:  -
+ *  Client:  - Classe que possui todos os menus que serão utilizados para mostrar o programa aos Clientes
  */
 
 public class Client {
@@ -17,15 +17,15 @@ public class Client {
     private static Menu menu = new Menu();
     private static Scanner sc = new Scanner(System.in);
 
-    private static String idU; //Variavel do username do Cliente
+    private static String idU; // Variavel do username do Cliente
 
     private static void run() {
         try {
-        menu.message("\n\nBem vindo ao sistema!!!\n");
-        homeMenu();
-        demultiplexer.close();
-        } catch (IOException e) {}
-        
+            menu.message("\n\nBem vindo ao sistema!!!\n");
+            homeMenu();
+            demultiplexer.close();
+        } catch (IOException e) {
+        }
     }
 
     // Método: Menu inicial
@@ -65,7 +65,7 @@ public class Client {
             int status = Integer.parseInt(new String(b1));
             byte[] b2 = demultiplexer.receive(0);
 
-            if (status == 1) 
+            if (status == 1)
                 menu.message("\n" + new String(b2) + "\n");
             else
                 menu.message("\n" + new String(b2) + "\nRegisto não efetuado.\n");
@@ -85,7 +85,7 @@ public class Client {
         if (isAdmin == 1)
             homeAdminMenu();
         else if (isAdmin == 0)
-            homeClientMenu();  
+            homeClientMenu();
         else
             homeMenu();
     }
@@ -114,8 +114,8 @@ public class Client {
         return -1;
     }
 
-    // Método: Faz Logout do utilizador
-    private static void logout(){
+    // Método: Termina a sessão do utilizador
+    private static void logout() {
         try {
             demultiplexer.send(7, (idU).getBytes());
 
@@ -229,7 +229,7 @@ public class Client {
         menu.message("Insira um intervalo de datas da separado por '/' (YYYY-MM-DD): ");
         String datas = sc.nextLine();
 
-        if ((!escalas.contains("-")) && (!datas.contains("/"))){
+        if ((!escalas.contains("-")) && (!datas.contains("/"))) {
             menu.message("\nParâmetros Errados\n");
             homeClientMenu();
         }
@@ -257,7 +257,6 @@ public class Client {
             e.getMessage();
         }
     }
-
 
     // Método: Cancelar uma viagem já reservada pelo cliente
     private static void cancelTrip() {
